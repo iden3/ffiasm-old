@@ -13,7 +13,11 @@ cd myProject
 buildzqfield -q 21888242871839275222246405745257275088548364400416034343698204186575808495617 -n Fr
 ```
 
-You now will have two files fr.c and fr.asm
+You now will have two files fr.c, fr.h and fr.asm
+
+```
+ls
+```
 
 If you are in linux:
 
@@ -42,15 +46,15 @@ int main() {
     a.shortVal = 2;
 
     FrElement b;
-    a.type = Fr_SHORT;
-    a.shortVal = 6;
+    b.type = Fr_SHORT;
+    b.shortVal = 6;
 
     FrElement c;
 
     Fr_mul(&c, &a, &b);
 
     char *c1 = Fr_element2str(&c);
-    printf("Result: %s\n", c);
+    printf("Result: %s\n", c1);
     free(c1);
 }
 ```
@@ -65,10 +69,6 @@ Run it
 ```
 ./example
 ```
-
-## License
-
-# Finite field library in Wasm and Javascript
 
 ## License
 
