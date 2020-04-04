@@ -7,6 +7,8 @@ const renderFile = util.promisify(require("ejs").renderFile);
 
 const runningAsScript = !module.parent;
 
+const montgomeryGen = require("./montgomery2");
+
 
 class ZqBuilder {
     constructor(q, name) {
@@ -41,9 +43,11 @@ class ZqBuilder {
 async function buildField(q, name) {
     const builder = new ZqBuilder(q, name);
 
-    const asm = await renderFile(path.join(__dirname, "fr.asm.ejs"), builder);
+    let asm = await renderFile(path.join(__dirname, "fr.asm.ejs"), builder);
     const c = await renderFile(path.join(__dirname, "fr.c.ejs"), builder);
     const h = await renderFile(path.join(__dirname, "fr.h.ejs"), builder);
+
+    asm = montgomeryGen("rawMontgomeryMul", q) + asm;
 
     return {asm: asm, h: h, c: c};
 }
@@ -62,6 +66,7 @@ if (runningAsScript) {
     const asmFileName =  (argv.oc) ? argv.oc : argv.name.toLowerCase() + ".asm";
     const hFileName =  (argv.oc) ? argv.oc : argv.name.toLowerCase() + ".h";
     const cFileName =  (argv.oc) ? argv.oc : argv.name.toLowerCase() + ".c";
+
 
     buildField(q, argv.name).then( (res) => {
         fs.writeFileSync(asmFileName, res.asm, "utf8");

@@ -6,6 +6,7 @@ const bigInt = require("big-integer");
 
 const bn128q = new bigInt("21888242871839275222246405745257275088696311157297823662689037894645226208583");
 const bn128r = new bigInt("21888242871839275222246405745257275088548364400416034343698204186575808495617");
+const bls12_381q = new bigInt("4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129015664037894272559787");
 const secp256k1q = new bigInt("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
 const secp256k1r = new bigInt("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
 const mnt6753q = new bigInt("41898490967918953402344214791240637128170709919953949071783502921025352812571106773058893763790338921418070971888458477323173057491593855069696241854796396165721416325350064441470418137846398469611935719059908164220784476160001");
@@ -13,6 +14,7 @@ const mnt6753r = new bigInt("418984909679189534023442147912406371281707099199539
 
 describe("field asm test", function () {
     this.timeout(1000000000);
+/*
     it("bn128r add", async () => {
         const tv = buildTestVector2(bn128r, "add");
         await tester(bn128r, tv);
@@ -49,10 +51,16 @@ describe("field asm test", function () {
         const tv = buildTestVector1(mnt6753q, "neg");
         await tester(mnt6753q, tv);
     });
+
+*/
+    it("bls12-381 mul", async () => {
+        const tv = buildTestVector2(bls12_381q, "mul");
+        await tester(bls12_381q, tv);
+    });
     it("bn128r mul", async () => {
         const tv = buildTestVector2(bn128r, "mul");
         await tester(bn128r, tv);
-    });
+    }); 
     it("secp256k1q mul", async () => {
         const tv = buildTestVector2(secp256k1q, "mul");
         await tester(secp256k1q, tv);
@@ -61,6 +69,7 @@ describe("field asm test", function () {
         const tv = buildTestVector2(mnt6753q, "mul");
         await tester(mnt6753q, tv);
     });
+/*
     it("bn128r binary and", async () => {
         const tv = buildTestVector2(bn128r, "band");
         await tester(bn128r, tv);
@@ -305,6 +314,7 @@ describe("field asm test", function () {
         const tv = buildTestVector1(mnt6753q, "bnot");
         await tester(mnt6753q, tv);
     });
+*/
 });
 
 function buildTestVector2(p, op) {
