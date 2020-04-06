@@ -254,6 +254,7 @@ rawSubSL_done:
 ;    rax
 ;;;;;;;;;;;;;;;;;;;;;;
 rawSubLL:
+<%=name%>_rawSub:
         ; Substract first digit
 <% for (let i=0; i<n64; i++) { %>
         mov rax, [rsi + <%=i*8%>]

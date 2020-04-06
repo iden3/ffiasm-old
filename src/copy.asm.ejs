@@ -16,6 +16,25 @@
 <% } %>
         ret
 
+
+;;;;;;;;;;;;;;;;;;;;;;
+; rawCopy
+;;;;;;;;;;;;;;;;;;;;;;
+; Copies
+; Params:
+;   rsi <= the src
+;   rdi <= the dest
+;
+; Nidified registers:
+;   rax
+;;;;;;;;;;;;;;;;;;;;;;;
+<%=name%>_rawCopy:
+<% for (let i=0; i<n64; i++) { %>
+        mov     rax, [rsi + <%= i*8 %>]
+        mov     [rdi + <%= i*8 %>], rax
+<% } %>
+        ret
+
 ;;;;;;;;;;;;;;;;;;;;;;
 ; copy an array of integers
 ;;;;;;;;;;;;;;;;;;;;;;

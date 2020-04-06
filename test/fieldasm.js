@@ -52,15 +52,32 @@ describe("field asm test", function () {
         await tester(mnt6753q, tv);
     });
 
-*/
+
+    it("bn128r square", async () => {
+        const tv = buildTestVector1(bn128r, "square");
+        await tester(bn128r, tv);
+    });
+    it("bls12-381 square", async () => {
+        const tv = buildTestVector1(bls12_381q, "square");
+        await tester(bls12_381q, tv);
+    });
+    it("secp256k1q square", async () => {
+        const tv = buildTestVector1(secp256k1q, "square");
+        await tester(secp256k1q, tv);
+    });
+    it("mnt6753q square", async () => {
+        const tv = buildTestVector1(mnt6753q, "square");
+        await tester(mnt6753q, tv);
+    });
+
+    it("bn128r mul", async () => {
+        const tv = buildTestVector2(bn128r, "mul");
+        await tester(bn128r, tv);
+    });
     it("bls12-381 mul", async () => {
         const tv = buildTestVector2(bls12_381q, "mul");
         await tester(bls12_381q, tv);
     });
-    it("bn128r mul", async () => {
-        const tv = buildTestVector2(bn128r, "mul");
-        await tester(bn128r, tv);
-    }); 
     it("secp256k1q mul", async () => {
         const tv = buildTestVector2(secp256k1q, "mul");
         await tester(secp256k1q, tv);
@@ -69,7 +86,7 @@ describe("field asm test", function () {
         const tv = buildTestVector2(mnt6753q, "mul");
         await tester(mnt6753q, tv);
     });
-/*
+*/
     it("bn128r binary and", async () => {
         const tv = buildTestVector2(bn128r, "band");
         await tester(bn128r, tv);
@@ -262,18 +279,6 @@ describe("field asm test", function () {
         const tv = buildTestVector2(mnt6753q, "div");
         await tester(mnt6753q, tv);
     });
-    it("bn128r square", async () => {
-        const tv = buildTestVector1(bn128r, "square");
-        await tester(bn128r, tv);
-    });
-    it("secp256k1q square", async () => {
-        const tv = buildTestVector1(secp256k1q, "square");
-        await tester(secp256k1q, tv);
-    });
-    it("mnt6753q square", async () => {
-        const tv = buildTestVector1(mnt6753q, "square");
-        await tester(mnt6753q, tv);
-    });
     it("bn128r shl", async () => {
         const tv = buildTestVector2(bn128r, "shl");
         await tester(bn128r, tv);
@@ -314,7 +319,7 @@ describe("field asm test", function () {
         const tv = buildTestVector1(mnt6753q, "bnot");
         await tester(mnt6753q, tv);
     });
-*/
+
 });
 
 function buildTestVector2(p, op) {

@@ -43,7 +43,7 @@ square_manageOverflow:                 ; Do the operation in 64 bits
         <% const rawPositiveLabel = global.tmpLabel() %>
         jns <%= rawPositiveLabel %>
         neg rdx
-        call rawMontgomeryMul1
+        call <%=name%>_rawMMul1
         mov rsi, rdi
         call rawNegL
         sub rdi, 8
@@ -51,7 +51,7 @@ square_manageOverflow:                 ; Do the operation in 64 bits
         <% const done = global.tmpLabel() %>
         jmp <%= done %>
 <%= rawPositiveLabel %>:
-        call rawMontgomeryMul1
+        call <%=name%>_rawMMul1
         sub rdi, 8
         pop rsi
 <%= done %>:
@@ -67,7 +67,7 @@ square_manageOverflow:                 ; Do the operation in 64 bits
         <% const rawPositiveLabel = global.tmpLabel() %>
         jns <%= rawPositiveLabel %>
         neg rdx
-        call rawMontgomeryMul1
+        call <%=name%>_rawMMul1
         mov rsi, rdi
         call rawNegL
         sub rdi, 8
@@ -75,7 +75,7 @@ square_manageOverflow:                 ; Do the operation in 64 bits
         <% const done = global.tmpLabel() %>
         jmp <%= done %>
 <%= rawPositiveLabel %>:
-        call rawMontgomeryMul1
+        call <%=name%>_rawMMul1
         sub rdi, 8
         pop rsi
 <%= done %>:
@@ -86,7 +86,7 @@ square_manageOverflow:                 ; Do the operation in 64 bits
         add rdi, 8
         add rsi, 8
         add rdx, 8
-        call rawMontgomeryMul
+        call <%=name%>_rawMMul
         sub rdi, 8
         sub rsi, 8
 <% } %>
@@ -95,7 +95,7 @@ square_manageOverflow:                 ; Do the operation in 64 bits
 <% function squareL1() { %>
         add rdi, 8
         add rsi, 8
-        call rawMontgomerySquare
+        call <%=name%>_rawMSquare
         sub rdi, 8
         sub rsi, 8
 <% } %>
@@ -105,7 +105,7 @@ square_manageOverflow:                 ; Do the operation in 64 bits
         add rdi, 8
         mov rsi, rdi
         lea rdx, [R3]
-        call rawMontgomeryMul
+        call <%=name%>_rawMMul
         sub rdi, 8
         pop rsi
 <% } %>

@@ -176,6 +176,7 @@ add_l1ml2m:
 ;    rax
 ;;;;;;;;;;;;;;;;;;;;;;
 rawAddLL:
+<%=name%>_rawAdd:
         ; Add component by component with carry
 <% for (let i=0; i<n64; i++) { %>
         mov rax, [rsi + <%=i*8%>]

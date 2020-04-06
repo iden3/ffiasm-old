@@ -7,7 +7,7 @@ const renderFile = util.promisify(require("ejs").renderFile);
 
 const runningAsScript = !module.parent;
 
-const montgomeryGen = require("./montgomery2");
+const montgomeryBuilder = require("./montgomerybuilder");
 
 
 class ZqBuilder {
@@ -24,6 +24,7 @@ class ZqBuilder {
             label = label || "tmp";
             return label+"_"+self.lastTmp;
         };
+        this.montgomeryBuilder = montgomeryBuilder;
     }
 
     constantElement(v) {
@@ -46,8 +47,6 @@ async function buildField(q, name) {
     let asm = await renderFile(path.join(__dirname, "fr.asm.ejs"), builder);
     const c = await renderFile(path.join(__dirname, "fr.c.ejs"), builder);
     const h = await renderFile(path.join(__dirname, "fr.h.ejs"), builder);
-
-    asm = montgomeryGen("rawMontgomeryMul", q) + asm;
 
     return {asm: asm, h: h, c: c};
 }

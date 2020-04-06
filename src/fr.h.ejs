@@ -40,6 +40,14 @@ extern "C" void <%=name%>_toMontgomery(P<%=name%>Element pE);
 extern "C" int <%=name%>_isTrue(P<%=name%>Element pE);
 extern "C" int <%=name%>_toInt(P<%=name%>Element pE);
 
+extern "C" void <%=name%>_rawCopy(uint64_t *pRawResult, uint64_t *pRawA);
+extern "C" void <%=name%>_rawAdd(uint64_t *pRawResult, uint64_t *pRawA, uint64_t *pRawB);
+extern "C" void <%=name%>_rawSub(uint64_t *pRawResult, uint64_t *pRawA, uint64_t *pRawB);
+extern "C" void <%=name%>_rawNeg(uint64_t *pRawResult, uint64_t *pRawA);
+extern "C" void <%=name%>_rawMMul(uint64_t *pRawResult, uint64_t *pRawA, uint64_t *pRawB);
+extern "C" void <%=name%>_rawMSquare(uint64_t *pRawResult, uint64_t *pRawA);
+extern "C" void <%=name%>_rawMMul1(uint64_t *pRawResult, uint64_t *pRawA, uint64_t pRawB);
+
 extern "C" void <%=name%>_fail();
 
 extern <%=name%>Element <%=name%>_q;
