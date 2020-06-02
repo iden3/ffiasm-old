@@ -437,3 +437,56 @@ req_ret0:
         xor rax, 1
         mov [rdi], rax
         ret
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;
+; rawIsEq
+;;;;;;;;;;;;;;;;;;;;;;
+; Compares two elements of any kind
+; Params:
+;   rdi <= Pointer to element 1
+;   rsi <= Pointer to element 2
+; Returns 
+;   ax <= 1 if are equal 0, otherwise
+; Modified Registers:
+;   rax
+;;;;;;;;;;;;;;;;;;;;;;
+<%=name%>_rawIsEq:
+<%   for (let i=0; i<n64; i++) { %>
+        mov     rax, [rsi + <%= (i*8) %>]
+        cmp     [rdi + <%= (i*8) %>], rax
+        jne     rawIsEq_ret0                   
+<%   } %>
+rawIsEq_ret1:
+        mov    rax, 1
+        ret
+
+rawIsEq_ret0:
+        xor    rax, rax
+        ret
+
+;;;;;;;;;;;;;;;;;;;;;;
+; rawIsZero
+;;;;;;;;;;;;;;;;;;;;;;
+; Compares two elements of any kind
+; Params:
+;   rdi <= Pointer to element 1
+; Returns 
+;   ax <= 1 if is 0, otherwise
+; Modified Registers:
+;   rax
+;;;;;;;;;;;;;;;;;;;;;;
+<%=name%>_rawIsZero:
+<%   for (let i=0; i<n64; i++) { %>
+        cmp     qword [rdi + <%= (i*8) %>], $0
+        jne     rawIsZero_ret0                    
+<%   } %>
+
+rawIsZero_ret1:
+        mov    rax, 1
+        ret
+
+rawIsZero_ret0:
+        xor    rax, rax
+        ret

@@ -28,7 +28,8 @@ function templateMontgomery(fn, q, upperLoop) {
 
     c.op("mov","rcx","rdx");   // rdx is needed for multiplications so keep it in cx
     
-    c.op("mov", 2, `0x${np64.toString(16)}`);
+    // c.op("mov", 2, `0x${np64.toString(16)}`);
+    c.op("mov", 2, "[ np ]");
     c.op("xor", 3, 3);    
 
     c.code.push("");

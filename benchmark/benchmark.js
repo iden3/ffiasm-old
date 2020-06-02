@@ -16,10 +16,10 @@ async function benchmarkMM(op, prime) {
     // console.log(dir.path);
 
     await fs.promises.writeFile(path.join(dir.path, "fr.asm"), source.asm, "utf8");
-    await fs.promises.writeFile(path.join(dir.path, "fr.h"), source.h, "utf8");
-    await fs.promises.writeFile(path.join(dir.path, "fr.c"), source.c, "utf8");
+    await fs.promises.writeFile(path.join(dir.path, "fr.hpp"), source.h, "utf8");
+    await fs.promises.writeFile(path.join(dir.path, "fr.cpp"), source.c, "utf8");
 
-    await exec(`cp  ${path.join(__dirname,  `${op}.c`)} ${dir.path}`);
+    await exec(`cp  ${path.join(__dirname,  `${op}.cpp`)} ${dir.path}`);
 
     if (process.platform === "darwin") {
         await exec("nasm -fmacho64 --prefix _ " +
@@ -32,9 +32,9 @@ async function benchmarkMM(op, prime) {
     } else throw("Unsupported platform");
 
     await exec("g++" +
-       ` ${path.join(dir.path,  `${op}.c`)}` +
+       ` ${path.join(dir.path,  `${op}.cpp`)}` +
        ` ${path.join(dir.path,  "fr.o")}` +
-       ` ${path.join(dir.path,  "fr.c")}` +
+       ` ${path.join(dir.path,  "fr.cpp")}` +
        ` -o ${path.join(dir.path, "benchmark")}` +
        " -lgmp -O3"
     );
@@ -50,7 +50,7 @@ async function benchmarkMM(op, prime) {
 
 async function run() {
     let t;
-
+/*
     //  COPY
     t = await benchmarkMM("copy", bigInt("21888242871839275222246405745257275088548364400416034343698204186575808495617"));
     console.log("copy bn256r Montgomery IntelASM: " + (t/1000) + "s " + (t * 1e6 / N) + "ns per multiplication.");
@@ -91,7 +91,7 @@ async function run() {
     // t = await benchmarkMM("rawadd", bigInt("41898490967918953402344214791240637128170709919953949071783502921025352812571106773058893763790338921418070971888253786114353726529584385201591605722013126468931404347949840543007986327743462853720628051692141265303114721689601"));
     // console.log("Raw add mnt6753 Montgomery IntelASM: " + (t/1000) + "s " + (t * 1e6 / N) + "ns per multiplication.");
 
-/*
+
     //  MUL
     t = await benchmarkMM("mul", bigInt("21888242871839275222246405745257275088548364400416034343698204186575808495617"));
     console.log("Multiplication bn256r Montgomery IntelASM: " + (t/1000) + "s " + (t * 1e6 / N) + "ns per multiplication.");
@@ -101,7 +101,7 @@ async function run() {
 
     // t = await benchmarkMM("mul", bigInt("41898490967918953402344214791240637128170709919953949071783502921025352812571106773058893763790338921418070971888253786114353726529584385201591605722013126468931404347949840543007986327743462853720628051692141265303114721689601"));
     // console.log("Multiplication mnt6753 Montgomery IntelASM: " + (t/1000) + "s " + (t * 1e6 / N) + "ns per multiplication.");
-
+*/
     t = await benchmarkMM("rawmmul", bigInt("21888242871839275222246405745257275088548364400416034343698204186575808495617"));
     console.log("Raw multiplication bn256r Montgomery IntelASM: " + (t/1000) + "s " + (t * 1e6 / N) + "ns per multiplication.");
 
@@ -131,7 +131,7 @@ async function run() {
     // t = await benchmarkMM("rawsquare", bigInt("41898490967918953402344214791240637128170709919953949071783502921025352812571106773058893763790338921418070971888253786114353726529584385201591605722013126468931404347949840543007986327743462853720628051692141265303114721689601"));
     // console.log("Raw square mnt6753 Montgomery IntelASM: " + (t/1000) + "s " + (t * 1e6 / N) + "ns per multiplication.");
 
-*/
+
 }
 
 run();

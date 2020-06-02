@@ -21,8 +21,8 @@ async function  testField(prime, test) {
     // console.log(dir.path);
 
     await fs.promises.writeFile(path.join(dir.path, "fr.asm"), source.asm, "utf8");
-    await fs.promises.writeFile(path.join(dir.path, "fr.h"), source.h, "utf8");
-    await fs.promises.writeFile(path.join(dir.path, "fr.c"), source.c, "utf8");
+    await fs.promises.writeFile(path.join(dir.path, "fr.hpp"), source.hpp, "utf8");
+    await fs.promises.writeFile(path.join(dir.path, "fr.cpp"), source.cpp, "utf8");
 
     await exec(`cp  ${path.join(__dirname,  "tester.cpp")} ${dir.path}`);
 
@@ -39,7 +39,7 @@ async function  testField(prime, test) {
     await exec("g++" +
                ` ${path.join(dir.path,  "tester.cpp")}` +
                ` ${path.join(dir.path,  "fr.o")}` +
-               ` ${path.join(dir.path,  "fr.c")}` +
+               ` ${path.join(dir.path,  "fr.cpp")}` +
                ` -o ${path.join(dir.path, "tester")}` +
                " -lgmp -g"
     );

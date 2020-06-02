@@ -4,6 +4,19 @@
 <%= montgomeryBuilder.buildMul1(name+"_rawMMul1", q) %>
 <%= montgomeryBuilder.buildFromMontgomery(name+"_rawFromMontgomery", q) %>
 
+;;;;;;;;;;;;;;;;;;;;;;
+; rawToMontgomery
+;;;;;;;;;;;;;;;;;;;;;;
+; Convert a number to Montgomery
+;   rdi <= Pointer destination element 
+;   rsi <= Pointer to src element
+;;;;;;;;;;;;;;;;;;;;
+<%=name%>_rawToMontgomery:
+    push    rdx
+    lea     rdx, [R2]
+    call    <%=name%>_rawMMul
+    pop     rdx
+    ret
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ; toMontgomery

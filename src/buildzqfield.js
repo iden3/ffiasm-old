@@ -9,7 +9,6 @@ const runningAsScript = !module.parent;
 
 const montgomeryBuilder = require("./montgomerybuilder");
 
-
 class ZqBuilder {
     constructor(q, name) {
         const self = this;
@@ -45,10 +44,10 @@ async function buildField(q, name) {
     const builder = new ZqBuilder(q, name);
 
     let asm = await renderFile(path.join(__dirname, "fr.asm.ejs"), builder);
-    const c = await renderFile(path.join(__dirname, "fr.c.ejs"), builder);
-    const h = await renderFile(path.join(__dirname, "fr.h.ejs"), builder);
+    const cpp = await renderFile(path.join(__dirname, "fr.cpp.ejs"), builder);
+    const hpp = await renderFile(path.join(__dirname, "fr.hpp.ejs"), builder);
 
-    return {asm: asm, h: h, c: c};
+    return {asm: asm, hpp: hpp, cpp: cpp};
 }
 
 if (runningAsScript) {
@@ -63,14 +62,14 @@ if (runningAsScript) {
     const q = bigInt(argv.q);
 
     const asmFileName =  (argv.oc) ? argv.oc : argv.name.toLowerCase() + ".asm";
-    const hFileName =  (argv.oc) ? argv.oc : argv.name.toLowerCase() + ".h";
-    const cFileName =  (argv.oc) ? argv.oc : argv.name.toLowerCase() + ".c";
+    const hFileName =  (argv.oc) ? argv.oc : argv.name.toLowerCase() + ".hpp";
+    const cFileName =  (argv.oc) ? argv.oc : argv.name.toLowerCase() + ".cpp";
 
 
     buildField(q, argv.name).then( (res) => {
         fs.writeFileSync(asmFileName, res.asm, "utf8");
-        fs.writeFileSync(hFileName, res.h, "utf8");
-        fs.writeFileSync(cFileName, res.c, "utf8");
+        fs.writeFileSync(hFileName, res.hpp, "utf8");
+        fs.writeFileSync(cFileName, res.cpp, "utf8");
     });
 
 } else {

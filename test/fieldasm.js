@@ -69,11 +69,12 @@ describe("field asm test", function () {
         const tv = buildTestVector1(mnt6753q, "square");
         await tester(mnt6753q, tv);
     });
-
+*/
     it("bn128r mul", async () => {
         const tv = buildTestVector2(bn128r, "mul");
         await tester(bn128r, tv);
     });
+/*
     it("bls12-381 mul", async () => {
         const tv = buildTestVector2(bls12_381q, "mul");
         await tester(bls12_381q, tv);
@@ -86,7 +87,7 @@ describe("field asm test", function () {
         const tv = buildTestVector2(mnt6753q, "mul");
         await tester(mnt6753q, tv);
     });
-*/
+
     it("bn128r binary and", async () => {
         const tv = buildTestVector2(bn128r, "band");
         await tester(bn128r, tv);
@@ -319,7 +320,7 @@ describe("field asm test", function () {
         const tv = buildTestVector1(mnt6753q, "bnot");
         await tester(mnt6753q, tv);
     });
-
+*/
 });
 
 function buildTestVector2(p, op) {

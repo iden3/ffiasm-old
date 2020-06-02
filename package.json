@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha",
-    "benchmark": "node benchmark/benchmark.js"
+    "benchmark": "node benchmark/benchmark.js",
+    "task": "node ./tasksfile.js"
   },
   "bin": {
     "buildzqfield": "src/buildzqfield.js"
@@ -34,6 +35,7 @@
     "chai": "^4.2.0",
     "eslint": "^6.8.0",
     "ffjavascript": "0.0.3",
+    "tasksfile": "^5.1.0",
     "tmp-promise": "^2.0.2"
   },
   "dependencies": {

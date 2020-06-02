@@ -36,6 +36,27 @@
         ret
 
 ;;;;;;;;;;;;;;;;;;;;;;
+; rawSwap
+;;;;;;;;;;;;;;;;;;;;;;
+; Copies
+; Params:
+;   rdi <= a
+;   rsi <= p
+;
+; Nidified registers:
+;   rax
+;;;;;;;;;;;;;;;;;;;;;;;
+<%=name%>_rawSwap:
+<% for (let i=0; i<n64; i++) { %>
+        mov     rax, [rsi + <%= i*8 %>]
+        mov     rcx, [rdi + <%= i*8 %>]
+        mov     [rdi + <%= i*8 %>], rax
+        mov     [rsi + <%= i*8 %>], rbx
+<% } %>
+        ret
+
+        
+;;;;;;;;;;;;;;;;;;;;;;
 ; copy an array of integers
 ;;;;;;;;;;;;;;;;;;;;;;
 ; Copies

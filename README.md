@@ -13,7 +13,7 @@ cd myProject
 buildzqfield -q 21888242871839275222246405745257275088548364400416034343698204186575808495617 -n Fr
 ```
 
-You now will have two files fr.c, fr.h and fr.asm
+You now will have two files fr.cpp, fr.hpp and fr.asm
 
 ```
 ls
@@ -31,12 +31,12 @@ If you are in a mac:
 nasm -fmacho64 --prefix _ fr.asm
 ```
 
-Create a file named main.c to use the library
+Create a file named main.cpp to use the library
 
 ```C
 #include <stdio.h>
 #include <stdlib.h>
-#include "fr.h"
+#include "fr.hpp"
 
 int main() {
     Fr_init();
@@ -62,7 +62,7 @@ int main() {
 Compile it
 
 ```
-g++ main.c fr.o fr.c -o example -lgmp
+g++ main.cpp fr.o fr.cpp -o example -lgmp
 ```
 
 Run it

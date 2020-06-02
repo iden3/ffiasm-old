@@ -12,7 +12,7 @@
 #include <cassert>
 
 
-#include "fr.h"
+#include "fr.hpp"
 
 
 typedef void (*Func1)(PFrElement, PFrElement);
