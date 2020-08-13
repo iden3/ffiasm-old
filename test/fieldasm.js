@@ -14,7 +14,7 @@ const mnt6753r = new bigInt("418984909679189534023442147912406371281707099199539
 
 describe("field asm test", function () {
     this.timeout(1000000000);
-/*
+
     it("bn128r add", async () => {
         const tv = buildTestVector2(bn128r, "add");
         await tester(bn128r, tv);
@@ -69,12 +69,12 @@ describe("field asm test", function () {
         const tv = buildTestVector1(mnt6753q, "square");
         await tester(mnt6753q, tv);
     });
-*/
+
     it("bn128r mul", async () => {
         const tv = buildTestVector2(bn128r, "mul");
         await tester(bn128r, tv);
     });
-/*
+
     it("bls12-381 mul", async () => {
         const tv = buildTestVector2(bls12_381q, "mul");
         await tester(bls12_381q, tv);
@@ -320,7 +320,7 @@ describe("field asm test", function () {
         const tv = buildTestVector1(mnt6753q, "bnot");
         await tester(mnt6753q, tv);
     });
-*/
+
 });
 
 function buildTestVector2(p, op) {
