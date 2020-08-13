@@ -1,3 +1,5 @@
+#define COUNT_OPS
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "alt_bn128.hpp"
