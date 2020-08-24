@@ -8,7 +8,7 @@
 ; rawToMontgomery
 ;;;;;;;;;;;;;;;;;;;;;;
 ; Convert a number to Montgomery
-;   rdi <= Pointer destination element 
+;   rdi <= Pointer destination element
 ;   rsi <= Pointer to src element
 ;;;;;;;;;;;;;;;;;;;;
 <%=name%>_rawToMontgomery:
@@ -22,29 +22,27 @@
 ; toMontgomery
 ;;;;;;;;;;;;;;;;;;;;;;
 ; Convert a number to Montgomery
+;   rdi <= Destination
 ;   rdi <= Pointer element to convert
 ; Modified registers:
 ;    r8, r9, 10, r11, rax, rcx
 ;;;;;;;;;;;;;;;;;;;;
 <%=name%>_toMontgomery:
-    mov     rax, [rdi]
+    mov     rax, [rsi]
     bt      rax, 62                     ; check if montgomery
     jc      toMontgomery_doNothing
     bt      rax, 63
     jc      toMontgomeryLong
 
 toMontgomeryShort:
-    add     rdi, 8
-    push    rsi
-    push    rdx
-    lea     rsi, [R2]
     movsx   rdx, eax
+    mov     [rdi], rdx
+    add     rdi, 8
+    lea     rsi, [R2]
     cmp     rdx, 0
     js      negMontgomeryShort
 posMontgomeryShort:
     call    <%=name%>_rawMMul1
-    pop     rdx
-    pop     rsi
     sub     rdi, 8
     <%=     global.setTypeDest("0x40"); %>
     ret
@@ -54,8 +52,6 @@ negMontgomeryShort:
     call    <%=name%>_rawMMul1
     mov     rsi, rdi
     call    rawNegL
-    pop     rdx
-    pop     rsi
     sub     rdi, 8
     <%=     global.setTypeDest("0x40"); %>
     ret
@@ -64,28 +60,30 @@ negMontgomeryShort:
 toMontgomeryLong:
     mov     [rdi], rax
     add     rdi, 8
-    push    rsi
-    mov     rdx, rdi
-    lea     rsi, [R2]
+    add     rsi, 8
+    lea     rdx, [R2]
     call    <%=name%>_rawMMul
-    pop     rsi
+    sub     rsi, 8
     sub     rdi, 8
     <%=     global.setTypeDest("0xC0"); %>
+    ret
 
 
 toMontgomery_doNothing:
+    call   <%=name%>_copy
     ret
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ; toNormal
 ;;;;;;;;;;;;;;;;;;;;;;
 ; Convert a number from Montgomery
-;   rdi <= Pointer element to convert
+;   rdi <= Destination
+;   rsi <= Pointer element to convert
 ; Modified registers:
 ;    r8, r9, 10, r11, rax, rcx
 ;;;;;;;;;;;;;;;;;;;;
 <%=name%>_toNormal:
-    mov     rax, [rdi]
+    mov     rax, [rsi]
     bt      rax, 62                     ; check if montgomery
     jnc     toNormal_doNothing
     bt      rax, 63                     ; if short, it means it's converted
@@ -93,36 +91,40 @@ toMontgomery_doNothing:
 
 toNormalLong:
     add     rdi, 8
-    push    rsi
-    mov     rsi, rdi
+    add     rsi, 8
     call    <%=name%>_rawFromMontgomery
+    sub     rsi, 8
     sub     rdi, 8
-    pop     rsi
     <%=     global.setTypeDest("0x80"); %>
+    ret
 
 toNormal_doNothing:
+    call   <%=name%>_copy
     ret
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ; toLongNormal
 ;;;;;;;;;;;;;;;;;;;;;;
 ; Convert a number to long normal
-;   rdi <= Pointer element to convert
+;   rdi <= Destination
+;   rsi <= Pointer element to convert
 ; Modified registers:
 ;    r8, r9, 10, r11, rax, rcx
 ;;;;;;;;;;;;;;;;;;;;
 <%=name%>_toLongNormal:
-    mov     rax, [rdi]
-    bt      rax, 62                     ; check if montgomery
-    jc      toLongNormal_fromMontgomery
+    mov     rax, [rsi]
     bt      rax, 63                     ; check if long
     jnc     toLongNormal_fromShort
-    ret                                 ; It is already long
+    bt      rax, 62                     ; check if montgomery
+    jc      toLongNormal_fromMontgomery
+    call    <%=name%>_copy              ; It is already long
+    ret
 
 toLongNormal_fromMontgomery:
     add     rdi, 8
-    mov     rsi, rdi
+    add     rsi, 8
     call    <%=name%>_rawFromMontgomery
+    sub     rsi, 8
     sub     rdi, 8
     <%=     global.setTypeDest("0x80"); %>
     ret
@@ -134,4 +136,4 @@ toLongNormal_fromShort:
     mov     rsi, r8                     ; recover rsi
     <%=     global.setTypeDest("0x80"); %>
     ret
-    
+

@@ -5,6 +5,10 @@
         jo     add_manageOverflow   ; rsi already is the 64bits result
 
         mov    [rdi], rdx       ; not necessary to adjust so just save and return
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 
 add_manageOverflow:                 ; Do the operation in 64 bits
@@ -14,6 +18,10 @@ add_manageOverflow:                 ; Do the operation in 64 bits
         add    rsi, rdx
         call   rawCopyS2L
         pop    rsi
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 <% } %>
 
@@ -30,11 +38,19 @@ add_manageOverflow:                 ; Do the operation in 64 bits
         call rawSubLS
         sub rdi, 8
         sub rsi, 8
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 <%= rawAddLabel %>:
         call rawAddLS
         sub rdi, 8
         sub rsi, 8
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 
 <% } %>
@@ -50,11 +66,19 @@ add_manageOverflow:                 ; Do the operation in 64 bits
         call rawSubLS
         sub rdi, 8
         sub rsi, 8
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 <%= rawAddLabel %>:
         call rawAddLS
         sub rdi, 8
         sub rsi, 8
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 <% } %>
 
@@ -65,6 +89,10 @@ add_manageOverflow:                 ; Do the operation in 64 bits
         call rawAddLL
         sub rdi, 8
         sub rsi, 8
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 <% } %>
 
@@ -80,6 +108,10 @@ add_manageOverflow:                 ; Do the operation in 64 bits
 ;    r8, r9, 10, r11, rax, rcx
 ;;;;;;;;;;;;;;;;;;;;;;
 <%=name%>_add:
+        push   rbp
+        push   rsi
+        push   rdx
+        mov    rbp, rsp
         mov    rax, [rsi]
         mov    rcx, [rdx]
         bt     rax, 63          ; Check if is short first operand

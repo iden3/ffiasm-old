@@ -41,9 +41,9 @@ extern "C" void <%=name%>_geq(P<%=name%>Element r, P<%=name%>Element a, P<%=name
 extern "C" void <%=name%>_land(P<%=name%>Element r, P<%=name%>Element a, P<%=name%>Element b);
 extern "C" void <%=name%>_lor(P<%=name%>Element r, P<%=name%>Element a, P<%=name%>Element b);
 extern "C" void <%=name%>_lnot(P<%=name%>Element r, P<%=name%>Element a);
-extern "C" void <%=name%>_toNormal(P<%=name%>Element pE);
-extern "C" void <%=name%>_toLongNormal(P<%=name%>Element pE);
-extern "C" void <%=name%>_toMontgomery(P<%=name%>Element pE);
+extern "C" void <%=name%>_toNormal(P<%=name%>Element r, P<%=name%>Element a);
+extern "C" void <%=name%>_toLongNormal(P<%=name%>Element r, P<%=name%>Element a);
+extern "C" void <%=name%>_toMontgomery(P<%=name%>Element r, P<%=name%>Element a);
 
 extern "C" int <%=name%>_isTrue(P<%=name%>Element pE);
 extern "C" int <%=name%>_toInt(P<%=name%>Element pE);
@@ -121,7 +121,7 @@ public:
     int inline isZero(Element &a) { return <%=name%>_rawIsZero(a.v); };
 
     void toMpz(mpz_t r, Element &a);
-    
+
 };
 
 

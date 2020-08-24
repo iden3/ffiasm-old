@@ -4,7 +4,7 @@ const AsmBuilder = require("./asmbuilder");
 // Important Documentation:
 // https://www.microsoft.com/en-us/research/wp-content/uploads/1998/06/97Acar.pdf
 // https://hackmd.io/@zkteam/modular_multiplication#Benchmarks
-// 
+//
 
 
 module.exports.buildMul = buildMul;
@@ -13,7 +13,7 @@ module.exports.buildMul1 = buildMul1;
 module.exports.buildFromMontgomery = buildFromMontgomery;
 
 function templateMontgomery(fn, q, upperLoop) {
-    
+
 
     const n64 = Math.floor((q.bitLength() - 1) / 64)+1;
     const canOptimizeConsensys = q.shiftRight((n64-1)*64).leq( bigInt.one.shiftLeft(64).minus(1).shiftRight(1).minus(1) );
@@ -27,22 +27,22 @@ function templateMontgomery(fn, q, upperLoop) {
     const c = new AsmBuilder(fn, 4 + n64 + 1 + (canOptimizeConsensys ? 0 : 1));
 
     c.op("mov","rcx","rdx");   // rdx is needed for multiplications so keep it in cx
-    
+
     // c.op("mov", 2, `0x${np64.toString(16)}`);
     c.op("mov", 2, "[ np ]");
-    c.op("xor", 3, 3);    
+    c.op("xor", 3, 3);
 
     c.code.push("");
-    for (let i=0; i<n64; i++) {     
-                                 
+    for (let i=0; i<n64; i++) {
+
         upperLoop(c, params, i);
 
-        c.code.push("; SecondLoop");              
+        c.code.push("; SecondLoop");
         c.op("mov", "rdx", 2);
         c.op("mulx", 0, "rdx", t);
         c.op("mulx", 1, 0, "[q]");
         c.op("adcx", 0, t);
-        for (let j=1; j<n64; j++) {                 
+        for (let j=1; j<n64; j++) {
             c.op("mulx", (j+1)%2, t+j-1, `[q +${j*8}]`);
             c.op("adcx", t+j-1, j%2);
             c.op("adox", t+j-1, t+j);
@@ -50,18 +50,18 @@ function templateMontgomery(fn, q, upperLoop) {
         c.op("mov", t+n64-1, 3);
         c.op("adcx", t+n64-1, n64%2);
         c.op("adox", t+n64-1, t+n64);
-        if (!canOptimizeConsensys) {                 
+        if (!canOptimizeConsensys) {
             c.op("mov", t+n64, 3);
             c.op("adcx", t+n64, 3);
             c.op("adox", t+n64, t+n64+1);
         }
 
-        c.code.push("");                                                           
-    }                                                 
+        c.code.push("");
+    }
 
     c.code.push(";comparison");
     c.flushWr(false);
-    if (!canOptimizeConsensys) {                 
+    if (!canOptimizeConsensys) {
         c.op("test", t+n64, t+n64);
         c.code.push(`jnz ${fn}_sq`);
     }
@@ -86,7 +86,7 @@ function templateMontgomery(fn, q, upperLoop) {
     }
 
     return c.getCode();
-}         
+}
 
 
 function buildMul(fn, q) {
@@ -94,9 +94,9 @@ function buildMul(fn, q) {
         const {t, n64, canOptimizeConsensys} = params;
         c.code.push("; FirstLoop");
         c.op("mov","rdx", `[rsi + ${i*8}]`);
-        if (i==0) {                                   
-            c.op("mulx", 0, t, "[rcx]"); 
-            for (let j=1; j<n64; j++) {               
+        if (i==0) {
+            c.op("mulx", 0, t, "[rcx]");
+            for (let j=1; j<n64; j++) {
                 c.op("mulx", j%2, t+j, `[rcx +${j*8}]`);
                 c.op("adcx", t+j, (j-1)%2);
             }
@@ -108,14 +108,14 @@ function buildMul(fn, q) {
             } else {
                 c.op("mov", t+n64, 3);
                 c.op("adcx", t+n64 , (n64-1)%2);
-            }                                   
-        } else {     
+            }
+        } else {
             if (!canOptimizeConsensys) {
                 c.op("mov", t+n64+1, 3);
             } else {
                 c.op("mov", t+n64, 3);
-            }                                                                                  
-            for (let j=0; j<n64; j++) {               
+            }
+            for (let j=0; j<n64; j++) {
                 c.op("mulx", 1, 0, `[rcx +${j*8}]`);
                 c.op("adcx", t+j, 0);
                 c.op("adox", t+j+1, 1);
@@ -126,30 +126,30 @@ function buildMul(fn, q) {
                 c.op("adox", t+n64+1, 3);
             } else {
                 c.op("adcx", t+n64, 3);
-            }                                                 
-        }         
+            }
+        }
     });
 }
 
-/* 
+/*
 //
-// This is a try in making a better performance in squaring compared to 
+// This is a try in making a better performance in squaring compared to
 // multiplication.
 //
 // This subrutine works worst because Intel can handle only 2 carries. (We would need four to handle the doublings).
 // This forces us to use an extra register (rcx) and some logic for seting up and cumulating the carries.
 // The result is that this is 5% slower, so we just use the norml multiplication.
- 
+
 function buildSquare(fn, q) {
     return templateMontgomery(fn, q, function mulUpperLoop(c, params, i) {
         const {t, n64, canOptimizeConsensys} = params;
         c.code.push("; FirstLoop");
         c.op("mov","rdx", `[rsi + ${i*8}]`);
-        if (i==0) {                                   
+        if (i==0) {
             c.op("mulx", 0, t, "[rsi]");
             c.op("shr", 0, "1");
             c.op("adox", 1,3);  // Clean overflow flag
-            for (let j=i+1; j<n64; j++) {               
+            for (let j=i+1; j<n64; j++) {
                 c.op("mulx", j%2, t+j, `[rsi +${j*8}]`);
                 c.op("adox", t+j, (j-1)%2);
                 c.op("adcx", t+j, t+j);   // Double and accumulate in overflow carry
@@ -165,13 +165,13 @@ function buildSquare(fn, q) {
                 c.op("mov", t+n64, 3);
                 c.op("adox", t+n64 , (n64-1)%2);
                 c.op("adcx", t+n64, t+n64);   // Double and accumulate in overflow carry
-            }                                   
-        } else {     
+            }
+        } else {
             if (!canOptimizeConsensys) {
                 c.op("mov", t+n64+1, 3);
             } else {
                 c.op("mov", t+n64, 3);
-            }                                                                                  
+            }
             c.op("mulx", 1, 0, `[rsi + ${i*8}]`);
             c.op("adcx", t+i, 0);
             for (let j=i+1; j<n64; j++) {
@@ -188,7 +188,7 @@ function buildSquare(fn, q) {
                     c.op("adcx", "rcx", 3);
                 }
                 c.op("mulx", 1, 0, `[rsi +${j*8}]`);
-                c.op("adcx", t+j, 0);  
+                c.op("adcx", t+j, 0);
                 c.op("adox", t+j, 0);
             }
             if (i+1 < n64) {
@@ -202,14 +202,14 @@ function buildSquare(fn, q) {
                 if (!canOptimizeConsensys) {
                     c.op("adcx", t+n64+1, "rcx");
                     c.op("adox", t+n64+1, 3);
-                }           
+                }
             } else {
                 c.op("adcx", t+n64, 1);
                 if (!canOptimizeConsensys) {
                     c.op("adcx", t+n64+1, 3);
                 }
-            }                                     
-        }         
+            }
+        }
     });
 }
 
@@ -221,9 +221,9 @@ function buildSquare(fn, q) {
         const {t, n64, canOptimizeConsensys} = params;
         c.code.push("; FirstLoop");
         c.op("mov","rdx", `[rsi + ${i*8}]`);
-        if (i==0) {                                   
-            c.op("mulx", 0, t, "rdx"); 
-            for (let j=1; j<n64; j++) {               
+        if (i==0) {
+            c.op("mulx", 0, t, "rdx");
+            for (let j=1; j<n64; j++) {
                 c.op("mulx", j%2, t+j, `[rsi +${j*8}]`);
                 c.op("adcx", t+j, (j-1)%2);
             }
@@ -236,13 +236,13 @@ function buildSquare(fn, q) {
                 c.op("mov", t+n64, 3);
                 c.op("adcx", t+n64 , (n64-1)%2);
             }
-        } else {     
+        } else {
             if (!canOptimizeConsensys) {
                 c.op("mov", t+n64+1, 3);
             } else {
                 c.op("mov", t+n64, 3);
-            }                                                                                  
-            for (let j=0; j<n64; j++) {               
+            }
+            for (let j=0; j<n64; j++) {
                 c.op("mulx", 1, 0, `[rsi +${j*8}]`);
                 c.op("adcx", t+j, 0);
                 c.op("adox", t+j+1, 1);
@@ -253,8 +253,8 @@ function buildSquare(fn, q) {
                 c.op("adox", t+n64+1, 3);
             } else {
                 c.op("adcx", t+n64, 3);
-            }                                                 
-        }         
+            }
+        }
     });
 }
 
@@ -262,11 +262,11 @@ function buildSquare(fn, q) {
 function buildMul1(fn, q) {
     return templateMontgomery(fn, q, function mulUpperLoop(c, params, i) {
         const {t, n64, canOptimizeConsensys} = params;
-        if (i==0) {                                   
+        if (i==0) {
             c.code.push("; FirstLoop");
             c.op("mov","rdx", "rcx");
             c.op("mulx", 0, t, "[rsi]");
-            for (let j=1; j<n64; j++) {               
+            for (let j=1; j<n64; j++) {
                 c.op("mulx", j%2, t+j, `[rsi +${j*8}]`);
                 c.op("adcx", t+j, (j-1)%2);
             }
@@ -279,20 +279,20 @@ function buildMul1(fn, q) {
                 c.op("mov", t+n64, 3);
                 c.op("adcx", t+n64 , (n64-1)%2);
             }
-        } else {     
+        } else {
             if (!canOptimizeConsensys) {
                 c.op("mov", t+n64+1, 3);
             } else {
                 c.op("mov", t+n64, 3);
-            }                                                                                  
-        } 
+            }
+        }
     });
 }
 
 function buildFromMontgomery(fn, q) {
     return templateMontgomery(fn, q, function mulUpperLoop(c, params, i) {
         const {t, n64, canOptimizeConsensys} = params;
-        if (i==0) {                      
+        if (i==0) {
             c.code.push("; FirstLoop");
             for (let j=0; j<n64; j++) {
                 c.op("mov", t+j, `[rsi +${j*8}]`);
@@ -301,12 +301,12 @@ function buildFromMontgomery(fn, q) {
             if (!canOptimizeConsensys) {
                 c.op("mov", t+n64+1, 3);
             }
-        } else {     
+        } else {
             if (!canOptimizeConsensys) {
                 c.op("mov", t+n64+1, 3);
             } else {
                 c.op("mov", t+n64, 3);
-            }                                                                                  
+            }
         }
     });
 }

@@ -24,6 +24,10 @@
 ;    r8, r9, rax
 ;;;;;;;;;;;;;;;;;;;;;;
 <%=name%>_rgt:
+        push   rbp
+        push   rsi
+        push   rdx
+        mov    rbp, rsp
         mov    r8, [rsi]
         mov    r9, [rdx]
         bt     r8, 63          ; Check if is short first operand
@@ -120,9 +124,17 @@ rgtRawL1L2:
 
 rgt_ret0:
         xor    rax, rax
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 rgt_ret1:
         mov    rax, 1
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 
 
@@ -139,6 +151,10 @@ rgt_ret1:
 ;    r8, r9, rax
 ;;;;;;;;;;;;;;;;;;;;;;
 <%=name%>_rlt:
+        push   rbp
+        push   rsi
+        push   rdx
+        mov    rbp, rsp
         mov    r8, [rsi]
         mov    r9, [rdx]
         bt     r8, 63          ; Check if is short first operand
@@ -233,9 +249,17 @@ rltRawL1L2:
 
 rlt_ret0:
         xor    rax, rax
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 rlt_ret1:
         mov    rax, 1
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 
 
@@ -252,6 +276,10 @@ rlt_ret1:
 ;    r8, r9, rax
 ;;;;;;;;;;;;;;;;;;;;;;
 <%=name%>_req:
+        push   rbp
+        push   rsi
+        push   rdx
+        mov    rbp, rsp
         mov    r8, [rsi]
         mov    r9, [rdx]
         bt     r8, 63          ; Check if is short first operand
@@ -332,10 +360,18 @@ reqL1L2:
 
 req_ret1:
         mov    rax, 1
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 
 req_ret0:
         xor    rax, rax
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 
 
@@ -447,7 +483,7 @@ req_ret0:
 ; Params:
 ;   rdi <= Pointer to element 1
 ;   rsi <= Pointer to element 2
-; Returns 
+; Returns
 ;   ax <= 1 if are equal 0, otherwise
 ; Modified Registers:
 ;   rax
@@ -456,7 +492,7 @@ req_ret0:
 <%   for (let i=0; i<n64; i++) { %>
         mov     rax, [rsi + <%= (i*8) %>]
         cmp     [rdi + <%= (i*8) %>], rax
-        jne     rawIsEq_ret0                   
+        jne     rawIsEq_ret0
 <%   } %>
 rawIsEq_ret1:
         mov    rax, 1
@@ -472,7 +508,7 @@ rawIsEq_ret0:
 ; Compares two elements of any kind
 ; Params:
 ;   rdi <= Pointer to element 1
-; Returns 
+; Returns
 ;   ax <= 1 if is 0, otherwise
 ; Modified Registers:
 ;   rax
@@ -480,7 +516,7 @@ rawIsEq_ret0:
 <%=name%>_rawIsZero:
 <%   for (let i=0; i<n64; i++) { %>
         cmp     qword [rdi + <%= (i*8) %>], $0
-        jne     rawIsZero_ret0                    
+        jne     rawIsZero_ret0
 <%   } %>
 
 rawIsZero_ret1:

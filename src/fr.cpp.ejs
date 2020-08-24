@@ -15,14 +15,14 @@ static bool initialized = false;
 
 
 void <%=name%>_toMpz(mpz_t r, P<%=name%>Element pE) {
-    <%=name%>_toNormal(pE);
+    <%=name%>_toNormal(pE, pE);
     if (!(pE->type & <%=name%>_LONG)) {
         mpz_set_si(r, pE->shortVal);
         if (pE->shortVal<0) {
             mpz_add(r, r, q);
         }
     } else {
-        <%=name%>_toNormal(pE);
+        <%=name%>_toNormal(pE, pE);
         mpz_import(r, <%=name%>_N64, -1, 8, -1, 0, (const void *)pE->longVal);
     }
 }
@@ -73,7 +73,7 @@ char *<%=name%>_element2str(P<%=name%>Element pE) {
             mpz_add(r, r, q);
         }
     } else {
-        <%=name%>_toNormal(pE);
+        <%=name%>_toNormal(pE, pE);
         mpz_init(r);
         mpz_import(r, <%=name%>_N64, -1, 8, -1, 0, (const void *)pE->longVal);
     }

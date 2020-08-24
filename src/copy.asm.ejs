@@ -55,7 +55,7 @@
 <% } %>
         ret
 
-        
+
 ;;;;;;;;;;;;;;;;;;;;;;
 ; copy an array of integers
 ;;;;;;;;;;;;;;;;;;;;;;
@@ -137,10 +137,14 @@ u64toLong_adjust_neg:
         ret
 
 <%=name%>_long:
+        push   rbp
+        push   rsi
+        push   rdx
+        mov    rbp, rsp
         bt      rax, 62
         jnc     <%=name%>_longNormal
 <%=name%>_longMontgomery:
-        call    <%=name%>_toLongNormal
+<%=     global.fromMont_a()       %>
 
 <%=name%>_longNormal:
         mov     rax, [rdi + 8]
@@ -152,6 +156,10 @@ u64toLong_adjust_neg:
         test    rcx, rcx
         jnz     <%=name%>_longNeg
 <% } %>
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 
 <%=name%>_longNeg:
@@ -167,6 +175,10 @@ u64toLong_adjust_neg:
         sar     rcx, 31
         add     rcx, 1
         jnz     <%=name%>_longErr
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 
 <%=name%>_longErr:
@@ -174,6 +186,11 @@ u64toLong_adjust_neg:
         mov     rdi, 0
         call    <%=name%>_fail
         pop     rdi
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
+        ret
 
 
 

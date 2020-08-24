@@ -92,6 +92,7 @@ describe("field asm test", function () {
         const tv = buildTestVector2(bn128r, "band");
         await tester(bn128r, tv);
     });
+
     it("secp256k1q binary and", async () => {
         const tv = buildTestVector2(secp256k1q, "band");
         await tester(secp256k1q, tv);
@@ -252,6 +253,7 @@ describe("field asm test", function () {
         const tv = buildTestVector2(secp256k1q, "idiv");
         await tester(secp256k1q, tv);
     });
+
     it("mnt6753q idiv", async () => {
         const tv = buildTestVector2(mnt6753q, "idiv");
         await tester(mnt6753q, tv);

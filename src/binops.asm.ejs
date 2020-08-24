@@ -20,16 +20,20 @@
 
 
 <% function binOpS1S2(op) { %>
-        cmp    r8d, 0
+        cmp    eax, 0
         <% const s1s2_solveNeg = global.tmpLabel() %>
         js     <%=s1s2_solveNeg%>
 
-        cmp    r9d, 0
+        cmp    ecx, 0
         js     <%=s1s2_solveNeg%>
         xor    rdx, rdx         ; both ops are positive so do the op and return
-        mov    edx, r8d
-        <%=op%>    edx, r9d
+        mov    edx, eax
+        <%=op%>    edx, ecx
         mov    [rdi], rdx       ; not necessary to adjust so just save and return
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 
 <%=s1s2_solveNeg%>:
@@ -42,10 +46,10 @@
 <% } %>
 
 <% function binOpS1L2(op) { %>
-        cmp    r8d, 0
+        mov    eax, [rsi]
+        cmp    eax, 0
         <% const s1l2_solveNeg = global.tmpLabel() %>
         js     <%=s1l2_solveNeg%>
-        movsx  rax, r8d
         <%=op%> rax, [rdx +8]
         mov    [rdi+8], rax
 <%   for (let i=1; i<n64; i++) { %>
@@ -57,6 +61,10 @@
         mov    [rdi + <%= (i*8)+8 %> ], rax
 <%   } %>
 <%      binOpSubQIfBigger() %>
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 
 <%=s1l2_solveNeg%>:
@@ -67,10 +75,11 @@
 <% } %>
 
 <% function binOpL1S2(op) { %>
-        cmp    r9d, 0
+        mov    rcx, [rdx]
+        cmp    ecx, 0
         <% const l1s2_solveNeg = global.tmpLabel() %>
         js     <%=l1s2_solveNeg%>
-        movsx  rax, r9d
+        movsx  rax, ecx
         <%=op%> rax, [rsi +8]
         mov    [rdi+8], rax
 <%   for (let i=1; i<n64; i++) { %>
@@ -82,6 +91,10 @@
         mov    [rdi + <%= (i*8)+8 %> ], rax;
 <%   } %>
 <%      binOpSubQIfBigger() %>
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 
 <%=l1s2_solveNeg%>:
@@ -101,6 +114,10 @@
         mov    [rdi + <%= (i*8)+8 %> ], rax
 <%   } %>
 <%      binOpSubQIfBigger() %>
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 <% } %>
 
@@ -118,11 +135,15 @@
 ;    r8, r9, 10, r11, rax, rcx
 ;;;;;;;;;;;;;;;;;;;;;;
 <%=name%>_b<%=op%>:
-        mov    r8, [rsi]
-        mov    r9, [rdx]
-        bt     r8, 63          ; Check if is short first operand
+        push   rbp
+        push   rsi
+        push   rdx
+        mov    rbp, rsp
+        mov    rax, [rsi]
+        mov    rcx, [rdx]
+        bt     rax, 63          ; Check if is short first operand
         jc     <%=op%>_l1
-        bt     r9, 63          ; Check if is short second operand
+        bt     rcx, 63          ; Check if is short second operand
         jc     <%=op%>_s1l2
 
 <%=op%>_s1s2:
@@ -130,12 +151,12 @@
 
 
 <%=op%>_l1:
-        bt     r9, 63          ; Check if is short second operand
+        bt     rcx, 63          ; Check if is short second operand
         jc     <%=op%>_l1l2
 
 
 <%=op%>_l1s2:
-        bt     r8, 62          ; check if montgomery first
+        bt     rax, 62          ; check if montgomery first
         jc     <%=op%>_l1ms2
 <%=op%>_l1ns2:
 <%=     global.setTypeDest("0x80"); %>
@@ -143,14 +164,12 @@
 
 <%=op%>_l1ms2:
 <%=     global.setTypeDest("0x80"); %>
-        push   r9              ; r9 is used in montgomery so we need to save it
 <%=     global.fromMont_a()       %>
-        pop    r9
 <%=     binOpL1S2(op)       %>
 
 
 <%=op%>_s1l2:
-        bt     r9, 62          ; check if montgomery first
+        bt     rcx, 62          ; check if montgomery first
         jc     <%=op%>_s1l2m
 <%=op%>_s1l2n:
 <%=     global.setTypeDest("0x80"); %>
@@ -158,16 +177,14 @@
 
 <%=op%>_s1l2m:
 <%=     global.setTypeDest("0x80"); %>
-        push   r8             ; r8 is used in montgomery so we need to save it
 <%=     global.fromMont_b()       %>
-        pop    r8
 <%=     binOpS1L2(op)       %>
 
 
 <%=op%>_l1l2:
-        bt     r8, 62          ; check if montgomery first
+        bt     rax, 62          ; check if montgomery first
         jc     <%=op%>_l1ml2
-        bt     r9, 62          ; check if montgomery first
+        bt     rcx, 62          ; check if montgomery first
         jc     <%=op%>_l1nl2m
 <%=op%>_l1nl2n:
 <%=     global.setTypeDest("0x80"); %>
@@ -179,7 +196,7 @@
 <%=     binOpL1L2(op)       %>
 
 <%=op%>_l1ml2:
-        bt     r9, 62          ; check if montgomery first
+        bt     rcx, 62          ; check if montgomery first
         jc     <%=op%>_l1ml2m
 <%=op%>_l1ml2n:
 <%=     global.setTypeDest("0x80"); %>
@@ -209,17 +226,21 @@
 ;    r8, r9, 10, r11, rax, rcx
 ;;;;;;;;;;;;;;;;;;;;;;
 <%=name%>_bnot:
+        push   rbp
+        push   rsi
+        push   rdx
+        mov    rbp, rsp
         <%=     global.setTypeDest("0x80"); %>
 
-        mov     r8, [rsi]
-        bt      r8, 63          ; Check if is long operand
+        mov     rax, [rsi]
+        bt      rax, 63          ; Check if is long operand
         jc      bnot_l1
 bnot_s:
         <%=     global.toLong_a() %>
         jmp     bnot_l1n
 
 bnot_l1:
-        bt     r8, 62          ; check if montgomery first
+        bt     rax, 62          ; check if montgomery first
         jnc    bnot_l1n
 
 bnot_l1m:
@@ -235,6 +256,10 @@ bnot_l1n:
         mov    [rdi + <%= i*8 + 8 %>], rax
 <%   } %>
 <%      binOpSubQIfBigger() %>
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 
 

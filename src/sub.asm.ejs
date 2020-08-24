@@ -5,6 +5,10 @@
         jo     sub_manageOverflow   ; rsi already is the 64bits result
 
         mov    [rdi], rdx       ; not necessary to adjust so just save and return
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 
 sub_manageOverflow:                 ; Do the operation in 64 bits
@@ -14,6 +18,10 @@ sub_manageOverflow:                 ; Do the operation in 64 bits
         sub    rsi, rdx
         call   rawCopyS2L
         pop    rsi
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 <% } %>
 
@@ -28,11 +36,19 @@ sub_manageOverflow:                 ; Do the operation in 64 bits
         call rawAddLS
         sub rdi, 8
         sub rsi, 8
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 <%= rawSubLabel %>:
         call rawSubLS
         sub rdi, 8
         sub rsi, 8
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 <% } %>
 
@@ -50,6 +66,10 @@ sub_manageOverflow:                 ; Do the operation in 64 bits
         call rawSubSL
         sub rdi, 8
         pop rsi
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 
 <%= s1NegLabel %>:   ; First operand is negative
@@ -61,6 +81,10 @@ sub_manageOverflow:                 ; Do the operation in 64 bits
         call rawNegLS
         sub rdi, 8
         pop rsi
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 <% } %>
 
@@ -72,6 +96,10 @@ sub_manageOverflow:                 ; Do the operation in 64 bits
         call rawSubLL
         sub rdi, 8
         sub rsi, 8
+        mov rsp, rbp
+        pop rdx
+        pop rsi
+        pop rbp
         ret
 <% } %>
 
@@ -87,6 +115,10 @@ sub_manageOverflow:                 ; Do the operation in 64 bits
 ;    r8, r9, 10, r11, rax, rcx
 ;;;;;;;;;;;;;;;;;;;;;;
 <%=name%>_sub:
+        push   rbp
+        push   rsi
+        push   rdx
+        mov    rbp, rsp
         mov    rax, [rsi]
         mov    rcx, [rdx]
         bt     rax, 63          ; Check if is long first operand
