@@ -5,9 +5,13 @@
 #include <iostream>
 #include <fstream>
 #include <gmp.h>
+#include <memory>
 
 #include "alt_bn128.hpp"
-#include "binfileutils.hpp"
+#include "binfile_utils.hpp"
+#include "zkey_utils.hpp"
+#include "wtns_utils.hpp"
+#include "groth16.hpp"
 
 #define handle_error(msg) \
            do { perror(msg); exit(EXIT_FAILURE); } while (0)
@@ -20,11 +24,9 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    mpz_t altBbn128q;
+    mpz_t altBbn128r;
 
-    mpz_set_str(altBbn128q, "21888242871839275222246405745257275088696311157297823662689037894645226208583", 10)
-
-    ZKeyUtils::Header &zkeyHeader;
+    mpz_set_str(altBbn128r, "21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);
 
     try {
         std::string zkeyFilename = argv[1];
@@ -34,36 +36,50 @@ int main(int argc, char **argv) {
         std::ofstream proofFile;
         proofFile.open (proofFilename);
 
-        BinFile zkey(zkeyFilename);
-        ZKeyUtils::Header zkeyHeader = ZKeyUtils::loadHeader(zkey);
+        auto zkey = BinFileUtils::openExisting(zkeyFilename, "zkey", 1);
+        auto zkeyHeader = ZKeyUtils::loadHeader(zkey.get());
 
         std::string proofStr;
-        if (mpz_cmp(zkeyHeader.qPrime, altBbn128q) == 0) {
-
-            BinFile wtns(wtnsFilename);
-            WtnsUtils::Header wtnsHeader = WtnsUtils::loadHeader(wtns);
-
-            if (mpz_cmp(wtnsHeader.qPrime, altBbn128q) == 0) {
-
-                Groth16< AltBn128::Engine> prover(zkey);
-                Groth16< AltBn128::Engine>::Proof proof = prover.prove(wtns.geSetcion(2));
-                proofFile << proof.toJson();
-            } else {
-                throw std::invalid_argument( "different wtns curve" );
-            }
-        } else {
+        if (mpz_cmp(zkeyHeader->rPrime, altBbn128r) != 0) {
             throw std::invalid_argument( "zkey curve not supported" );
         }
+
+        auto wtns = BinFileUtils::openExisting(wtnsFilename, "wtns", 2);
+        auto wtnsHeader = WtnsUtils::loadHeader(wtns.get());
+
+        if (mpz_cmp(wtnsHeader->prime, altBbn128r) != 0) {
+            throw std::invalid_argument( "different wtns curve" );
+        }
+
+        auto prover = Groth16::makeProver<AltBn128::Engine>(
+            zkeyHeader->nVars,
+            zkeyHeader->nPublic,
+            zkeyHeader->domainSize,
+            zkeyHeader->nCoefs,
+            zkeyHeader->vk_alpha1,
+            zkeyHeader->vk_beta1,
+            zkeyHeader->vk_beta2,
+            zkeyHeader->vk_delta1,
+            zkeyHeader->vk_delta2,
+            zkey->getSectionData(4),    // Coefs
+            zkey->getSectionData(5),    // pointsA
+            zkey->getSectionData(6),    // pointsB1
+            zkey->getSectionData(7),    // pointsB2
+            zkey->getSectionData(8),    // pointsC
+            zkey->getSectionData(9)     // pointsH1
+        );
+        AltBn128::FrElement *wtnsData = (AltBn128::FrElement *)wtns->getSectionData(2);
+        auto proof = prover->prove(wtnsData);
+        proofFile << proof->toJson();
 
         proofFile.close();
 
     } catch (std::exception& e) {
+        mpz_clear(altBbn128r);
         std::cerr << e.what() << '\n';
         return -1;
     }
 
-
-    mpz_clear(altBbn128q);
-
+    mpz_clear(altBbn128r);
     exit(EXIT_SUCCESS);
 }

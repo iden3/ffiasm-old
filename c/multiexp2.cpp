@@ -28,7 +28,7 @@ uint32_t getChunk(uint8_t* scalars, uint32_t scalarSize,uint32_t bitsPerChunk, u
         res = (  *(uint32_t *)(scalars + scalarIdx*scalarSize + lsbIdx*4) ) >> shiftBits;
         res |= (  *(uint32_t *)(scalars + scalarIdx*scalarSize + (lsbIdx + 1)*4) ) << (32 - shiftBits);
     } else {
-        res = (  *(uint32_t *)(scalars + scalarIdx*scalarSize + lsbIdx) );
+        res = (  *(uint32_t *)(scalars + scalarIdx*scalarSize + lsbIdx*4) );
     }
     uint32_t maskBits = (lsbIdx*32 + shiftBits + bitsPerChunk > scalarSize*8) ? (scalarSize*8 - (lsbIdx*32 + shiftBits)) : bitsPerChunk;
     res = res & ((1 << maskBits) - 1);

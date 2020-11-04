@@ -29,11 +29,15 @@ void Curve<BaseField>::initCurve(typename BaseField::Element &aa, typename BaseF
     F.copy(fa, aa);
     F.copy(fb, ab);
     F.copy(fone.x, agx);
+    F.copy(foneAffine.x, agx);
     F.copy(fone.y, agy);
+    F.copy(foneAffine.y, agy);
     F.copy(fone.zz, F.one());
     F.copy(fone.zzz, F.one());
     F.copy(fzero.x, F.one());
+    F.copy(fzeroAffine.x, F.zero());
     F.copy(fzero.y, F.one());
+    F.copy(fzeroAffine.y, F.zero());
     F.copy(fzero.zz, F.zero());
     F.copy(fzero.zzz, F.zero());
 
@@ -542,6 +546,13 @@ void Curve<BaseField>::copy(Point &r, Point &a) {
 
 template <typename BaseField>
 void Curve<BaseField>::copy(Point &r, PointAffine &a) {
+    if (isZero(a)) {
+        F.copy(r.x, F.one());
+        F.copy(r.y, F.one());
+        F.copy(r.zz, F.zero());
+        F.copy(r.zzz, F.zero());
+        return;
+    }
     F.copy(r.x, a.x);
     F.copy(r.y, a.y);
     F.copy(r.zz, F.one());

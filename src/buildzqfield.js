@@ -53,7 +53,7 @@ async function buildField(q, name) {
 if (runningAsScript) {
     const fs = require("fs");
     var argv = require("yargs")
-        .usage("Usage: $0 -q [primeNum] -n [name] -oc [out .c file] -oh [out .h file]")
+        .usage("Usage: $0 -q [primeNum] -n [name] -oc [out .c file] -oh [out .h file] -oa [out .asm file]")
         .demandOption(["q","n"])
         .alias("q", "prime")
         .alias("n", "name")
@@ -61,8 +61,8 @@ if (runningAsScript) {
 
     const q = bigInt(argv.q);
 
-    const asmFileName =  (argv.oc) ? argv.oc : argv.name.toLowerCase() + ".asm";
-    const hFileName =  (argv.oc) ? argv.oc : argv.name.toLowerCase() + ".hpp";
+    const asmFileName =  (argv.oa) ? argv.oa : argv.name.toLowerCase() + ".asm";
+    const hFileName =  (argv.oh) ? argv.oh : argv.name.toLowerCase() + ".hpp";
     const cFileName =  (argv.oc) ? argv.oc : argv.name.toLowerCase() + ".cpp";
 
 

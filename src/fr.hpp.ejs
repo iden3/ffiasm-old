@@ -114,6 +114,7 @@ public:
     void inline square(Element &r, Element &a) { <%=name%>_rawMSquare(r.v, a.v); };
     void inv(Element &r, Element &a);
     void div(Element &r, Element &a, Element &b);
+    void exp(Element &r, Element &base, uint8_t* scalar, unsigned int scalarSize);
 
     void inline toMontgomery(Element &r, Element &a) { <%=name%>_rawToMontgomery(r.v, a.v); };
     void inline fromMontgomery(Element &r, Element &a) { <%=name%>_rawFromMontgomery(r.v, a.v); };
@@ -121,6 +122,11 @@ public:
     int inline isZero(Element &a) { return <%=name%>_rawIsZero(a.v); };
 
     void toMpz(mpz_t r, Element &a);
+    void fromMpz(Element &a, mpz_t r);
+
+    void fromUI(Element &r, unsigned long int v);
+
+    static Raw<%=name%> field;
 
 };
 

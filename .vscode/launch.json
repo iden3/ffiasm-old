@@ -5,16 +5,38 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "lldb",
-            "request": "custom",
-            "name": "Custom launch",
-            "targetCreateCommands": [
-                "target create ${workspaceFolder}/build/altbn128_test"
-            ],
-            "processCreateCommands": [
-                "settings set target.run-args 100",
-                "process launch"
-            ]
+            "name": "prover",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/prover",
+            "args": ["${workspaceFolder}/../factor/circuit_0000.zkey", "${workspaceFolder}/../factor/witness.wtns", "${workspaceFolder}/../factor/proof.json"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb"
+        },
+        {
+            "name": "altbn128_test",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/altbn128_test",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb"
+        },
+        {
+            "name": "parallelacc_test",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/parallelacc_test",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb"
         }
     ]
 }

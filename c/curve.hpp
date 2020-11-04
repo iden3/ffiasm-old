@@ -33,6 +33,8 @@ private:
     typename BaseField::Element fb;
     Point fone;
     Point fzero;
+    PointAffine foneAffine;
+    PointAffine fzeroAffine;
 
 
 
@@ -58,7 +60,9 @@ public:
     typename BaseField::Element &a() {return fa; };
     typename BaseField::Element &b() {return fb; };
     Point &one() {return fone; };
+    PointAffine &oneAffine() {return foneAffine; };
     Point &zero() {return fzero; };
+    PointAffine &zeroAffine() {return fzeroAffine; };
 
     void add(Point &p3, Point &p1, Point &p2);
     void add(Point &p3, Point &p1, PointAffine &p2);
@@ -105,7 +109,11 @@ public:
     void copy(PointAffine &r, PointAffine &a);
 
     void mulByScalar(Point &r, Point &base, uint8_t* scalar, unsigned int scalarSize) {
-        nafMulByScalar<Curve<BaseField>, Point>(*this, r, base, scalar, scalarSize);
+        nafMulByScalar<Curve<BaseField>, Point, Point>(*this, r, base, scalar, scalarSize);
+    }
+
+    void mulByScalar(Point &r, PointAffine &base, uint8_t* scalar, unsigned int scalarSize) {
+        nafMulByScalar<Curve<BaseField>, PointAffine, Point>(*this, r, base, scalar, scalarSize);
     }
 
     void multiMulByScalar(Point &r, PointAffine *bases, uint8_t* scalars, unsigned int scalarSize, unsigned int n) {

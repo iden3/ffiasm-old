@@ -3,9 +3,9 @@
 
 #include "naf.hpp"
 
-template <typename BaseGroup, typename BaseGroupElementIn, typename BaseGroupElementOut>
-void nafMulByScalar(BaseGroup &G, BaseGroupElementOut& r, BaseGroupElementIn& base, uint8_t* scalar, unsigned int scalarSize) {
-    BaseGroupElementIn baseCopy;
+template <typename Field>
+void exp(Field::Element& res, Field::Element& base, uint8_t* scalar, unsigned int scalarSize) {
+    Field::Element baseCopy;
     int nBits = (scalarSize*8)+2;
     uint8_t *naf = new uint8_t[(scalarSize+2)*8];
     buildNaf(naf, scalar, scalarSize);
@@ -26,4 +26,3 @@ void nafMulByScalar(BaseGroup &G, BaseGroupElementOut& r, BaseGroupElementIn& ba
 
     delete naf;
 }
-

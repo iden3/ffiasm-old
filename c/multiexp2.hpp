@@ -29,6 +29,10 @@ void fastMultiMulByScalar(BaseGroup &G, GroupElement& r, BasesGroupElement *base
         G.copy(r, G.zero());
         return;
     }
+    if (n==1) {
+        G.mulByScalar(r, bases[0], scalars, scalarSize);
+        return;
+    }
     uint32_t bitsPerChunk = log2(n);
     if (bitsPerChunk > MAX_CHUNK_SIZE_BITS) bitsPerChunk = MAX_CHUNK_SIZE_BITS;
     uint32_t nChunks = ((scalarSize*8 - 1 ) / bitsPerChunk)+1;  // +1 Is because we want a sign

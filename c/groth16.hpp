@@ -1,24 +1,109 @@
-
-
-template <typename Engine>
 #include <string>
 
-class Groth16 {
+#include "binfile_utils.hpp"
 
-public:
+namespace Groth16 {
+
+    template <typename Engine>
     class Proof {
-
+        Engine &E;
     public:
-        Engine::G1 A;
-        Engine::G2 B;
-        Engine::G1 C;
+        typename Engine::G1PointAffine A;
+        typename Engine::G2PointAffine B;
+        typename Engine::G1PointAffine C;
+
+        Proof(Engine &_E) : E(_E) { };
+        std::string toJson();
     };
 
-    Engine &E;
+ #pragma pack(push, 1)
+    template <typename Engine>
+    struct Coef {
+        u_int32_t m;
+        u_int32_t c;
+        u_int32_t s;
+        typename Engine::FrElement coef;
+    };
+#pragma pack(pop)
 
-    Groth16(Engine &aEngine, std::string &zkeyFileName);
-    Proof &prove(Engine::Fr *witness);
+    template <typename Engine>
+    class Prover {
 
+        Engine &E;
+        u_int32_t nVars;
+        u_int32_t nPublic;
+        u_int32_t domainSize;
+        u_int64_t nCoefs;
+        typename Engine::G1PointAffine &vk_alpha1;
+        typename Engine::G1PointAffine &vk_beta1;
+        typename Engine::G2PointAffine &vk_beta2;
+        typename Engine::G1PointAffine &vk_delta1;
+        typename Engine::G2PointAffine &vk_delta2;
+        Coef<Engine> *coefs;
+        typename Engine::G1PointAffine *pointsA;
+        typename Engine::G1PointAffine *pointsB1;
+        typename Engine::G2PointAffine *pointsB2;
+        typename Engine::G1PointAffine *pointsC;
+        typename Engine::G1PointAffine *pointsH;
+    public:
+        Prover(
+            Engine &_E, 
+            u_int32_t _nVars, 
+            u_int32_t _nPublic, 
+            u_int32_t _domainSize, 
+            u_int64_t _nCoefs, 
+            typename Engine::G1PointAffine &_vk_alpha1,
+            typename Engine::G1PointAffine &_vk_beta1,
+            typename Engine::G2PointAffine &_vk_beta2,
+            typename Engine::G1PointAffine &_vk_delta1,
+            typename Engine::G2PointAffine &_vk_delta2,
+            Coef<Engine> *_coefs, 
+            typename Engine::G1PointAffine *_pointsA,
+            typename Engine::G1PointAffine *_pointsB1,
+            typename Engine::G2PointAffine *_pointsB2,
+            typename Engine::G1PointAffine *_pointsC,
+            typename Engine::G1PointAffine *_pointsH
+        ) : 
+            E(_E), 
+            nVars(_nVars),
+            nPublic(_nPublic),
+            domainSize(_domainSize),
+            nCoefs(_nCoefs),
+            vk_alpha1(_vk_alpha1),
+            vk_beta1(_vk_beta1),
+            vk_beta2(_vk_beta2),
+            vk_delta1(_vk_delta1),
+            vk_delta2(_vk_delta2),
+            coefs(_coefs),
+            pointsA(_pointsA),
+            pointsB1(_pointsB1),
+            pointsB2(_pointsB2),
+            pointsC(_pointsC),
+            pointsH(_pointsH)
+        { };
+
+        std::unique_ptr<Proof<Engine>> prove(typename Engine::FrElement *wtns);
+    };
+
+    template <typename Engine>
+    std::unique_ptr<Prover<Engine>> makeProver(
+        u_int32_t nVars, 
+        u_int32_t nPublic, 
+        u_int32_t domainSize, 
+        u_int64_t nCoefs, 
+        void *vk_alpha1,
+        void *vk_beta1,
+        void *vk_beta2,
+        void *vk_delta1,
+        void *vk_delta2,
+        void *coefs,
+        void *pointsA,
+        void *pointsB1,
+        void *pointsB2,
+        void *pointsC,
+        void *pointsH
+    );
 };
+
 
 #include "groth16.cpp"

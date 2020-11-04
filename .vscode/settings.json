@@ -84,6 +84,7 @@
         "forward_list": "cpp",
         "set": "cpp",
         "unordered_set": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "__functional_03": "cpp"
     }
 }

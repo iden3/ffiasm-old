@@ -29,6 +29,33 @@
 			}
 		},
 		{
+			"label": "testParallelAcc",
+			"type": "shell",
+			"command": "npx task testParallelAcc",
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			},
+			"problemMatcher": {
+				"owner": "cpp",
+				"fileLocation": [
+					"relative",
+					"${workspaceFolder}/build"
+				],
+				"pattern": [
+					{
+						"regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+						"file": 1,
+						"line": 2,
+						"column": 3,
+						"severity": 4,
+						"message": 5
+					}
+				]
+			}
+		},
+		{
 			"label": "benchMultiExpG1",
 			"type": "shell",
 			"command": "npx task benchMultiExpG1",
@@ -57,6 +84,36 @@
 					}
 				]
 			}
-		}
+		},
+		{
+			"label": "prover",
+			"type": "shell",
+			"command": "npx task prover",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			},
+			"problemMatcher": {
+				"owner": "cpp",
+				"fileLocation": [
+					"relative",
+					"${workspaceFolder}/build"
+				],
+				"pattern": [
+					{
+						"regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+						"file": 1,
+						"line": 2,
+						"column": 3,
+						"severity": 4,
+						"message": 5
+					}
+				]
+			}
+		},
 	]
 }
