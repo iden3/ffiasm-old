@@ -26,6 +26,7 @@ int main(int argc, char **argv) {
 
     mpz_t altBbn128r;
 
+    mpz_init(altBbn128r);
     mpz_set_str(altBbn128r, "21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);
 
     try {

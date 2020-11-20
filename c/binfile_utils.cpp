@@ -23,7 +23,7 @@ BinFile::BinFile(std::string fileName, std::string _type, uint32_t maxVersion) {
         throw std::system_error(errno, std::generic_category(), "fstat");
 
     size = sb.st_size;
-    addr = (char *)mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    addr = (char *)mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0);
     close(fd);
 
     type.assign((const char *)addr, 4);
@@ -116,13 +116,13 @@ u_int64_t BinFile::getSectionSize(u_int32_t sectionId, u_int32_t sectionPos) {
     return  sections[sectionId][sectionPos].size;
 }
 
-inline u_int32_t BinFile::readU32LE() {
+u_int32_t BinFile::readU32LE() {
     u_int32_t res = *((u_int32_t *)((u_int64_t)addr + pos));
     pos += 4;
     return res;
 }
 
-inline u_int64_t BinFile::readU64LE() {
+u_int64_t BinFile::readU64LE() {
     u_int64_t res = *((u_int64_t *)((u_int64_t)addr + pos));
     pos += 8;
     return res;

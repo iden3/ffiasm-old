@@ -56,13 +56,14 @@ function testAltBn128() {
         " ../c/splitparstr.cpp"+
         " ../c/alt_bn128.cpp"+
         " ../c/alt_bn128_test.cpp"+
+        " ../c/misc.cpp"+
         " fq.cpp"+
         " fq.o"+
         " fr.cpp"+
         " fr.o"+
         " googletest-release-1.10.0/libgtest.a"+
         " -o altbn128_test" +
-        " -fmax-errors=5 -O3 -Wall -lgmp", {cwd: "build", nopipe: true}
+        " -fmax-errors=5 -pthread -std=c++11 -fopenmp -lgmp -g", {cwd: "build", nopipe: true}
     );
     sh("./altbn128_test", {cwd: "build", nopipe: true});
 }
@@ -83,7 +84,7 @@ function testParallelAcc() {
         " fr.cpp"+
         " fr.o"+
         " googletest-release-1.10.0/libgtest.a"+
-        " -o parallelacc_test -O3 -g -lgmp", {cwd: "build", nopipe: true}
+        " -o parallelacc_test -pthread -std=c++11 -lgmp  -O3", {cwd: "build", nopipe: true}
     );
     sh("./parallelacc_test", {cwd: "build", nopipe: true});
 }
@@ -136,6 +137,7 @@ function prover() {
         " -Igoogletest-release-1.10.0/googletest/include"+
         " -I."+
         " -I../c"+
+        " ../c/misc.cpp"+
         " ../c/naf.cpp"+
         " ../c/multiexp2.cpp"+
         " ../c/splitparstr.cpp"+
@@ -149,7 +151,7 @@ function prover() {
         " fr.cpp"+
         " fr.o"+
         " -o prover" +
-        " -fmax-errors=5 -g -Wall -lgmp", {cwd: "build", nopipe: true}
+        " -fmax-errors=5 -std=c++17 -pthread -lgmp -O3 -fopenmp", {cwd: "build", nopipe: true}
     );
 //    sh("./multiexp_g2_benchmark 1000000", {cwd: "build", nopipe: true});
 }

@@ -24,6 +24,6 @@ void nafMulByScalar(BaseGroup &G, BaseGroupElementOut& r, BaseGroupElementIn& ba
         i--;
     }
 
-    delete naf;
+    delete[] naf;
 }
 

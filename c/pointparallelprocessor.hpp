@@ -4,9 +4,10 @@
 #include <vector>
 #include <thread>
 #include <mutex>
-#include "growablearray.hpp"
+#include <condition_variable>
+#include "growablearray_mt.hpp"
 
-#define NOPS_CHUNK 1<<14
+#define NOPS_CHUNK (uint64_t)(1LL<<13)
 #define MAX_LEVELS 1024
 template <typename Curve>
 class PointParallelProcessor {
@@ -29,47 +30,66 @@ public:
     struct Point {
         Source source;
         uint16_t level;
-        uint32_t idx;
+        void *p;
 
-        Point (Source _source, uint16_t _level, uint32_t _idx) : source(_source), level(_level), idx(_idx) {};
+        Point (Source _source, uint16_t _level, void *_p) : source(_source), level(_level), p(_p) {};
+        Point() {}
     };
     #pragma pack(pop)
 
 private:
     typename Curve::PointAffine *bases;
-    GrowableArray<typename Curve::Point> heap;
-    GrowableArray<Op> ops[MAX_LEVELS+1];
+    GrowableArrayMT<typename Curve::Point> *heap;
+    GrowableArrayMT<Op> **ops;
     u_int32_t nLevels;
 
     bool terminated;
+    uint32_t nThreads;
     uint32_t currentLevel;
-    uint64_t nOpsExecuting;
-    uint64_t nOpsExecuted;
-    uint64_t nOpsCommited;
+    typename GrowableArrayMT<Op>::Iterator itExecuting;
+    uint64_t pendingThreads;
+
     std::vector<std::thread> threads;
-    std::mutex mutex;
+    std::mutex cv_mutex;
     std::condition_variable cv;
 
-    void addOp(uint32_t level, Function fn, Point r, Point a, Point b);
-    Point allocHeapPoint(uint32_t level);
+    void addOp(uint32_t idThread, uint32_t level, Function fn, Point r, Point a, Point b);
+    Point allocHeapPoint(uint32_t idThread, uint32_t level);
     void *getPointPointer(Point p);
 
-    void childThread();
-    void innerProcess(uint32_t level, uint64_t start, uint64_t end);
+    void childThread(uint32_t th);
+    void innerProcess(uint32_t level, typename GrowableArrayMT<Op>::Iterator start, typename GrowableArrayMT<Op>::Iterator end);
 
 
 public:
 
-    PointParallelProcessor(Curve &_curve, uint32_t nThreads, typename Curve::PointAffine *bases);
-    ~PointParallelProcessor();
+    PointParallelProcessor(Curve &_curve, uint32_t _nThreads, typename Curve::PointAffine *_bases)  : curve(_curve) {
+        bases = _bases;
+        nThreads = _nThreads;
+        terminated = false;
+        nLevels = 0;
+        ops = new GrowableArrayMT<Op> *[MAX_LEVELS];
+        for (uint32_t i=0; i<MAX_LEVELS; i++) {
+            ops[i] = new GrowableArrayMT<Op>(nThreads);
+        }
+        heap = new GrowableArrayMT<typename Curve::Point>(nThreads);
+    }
 
-    Point add(Point a, Point b);
+    ~PointParallelProcessor() {
+        for (uint32_t i=0; i<MAX_LEVELS; i++) {
+            delete ops[i];
+        }
+        delete[] ops;
+        delete heap;
+    }
 
-    void terminateCalculus();
+    Point add(uint32_t idThread, Point a, Point b);
 
-    void extractResult(typename Curve::Point &r, Point v);
-    Point basePoint(uint32_t idx) { return Point(BASE, 0, idx); };
-    Point zero() { return Point(ZERO, 0, 0); };
+    void calculate();
+
+    void extractResult(typename Curve::Point &r, Point &v);
+    inline Point basePoint(uint32_t idx) { return Point(BASE, 0, &bases[idx]); };
+    inline Point zero() { return Point(ZERO, 0, (void *)&(curve.zero())); };
 };
 
 #include "pointparallelprocessor.cpp"

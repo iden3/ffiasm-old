@@ -9,7 +9,7 @@ class GrowableArray {
     uint32_t m_nPages;
     uint32_t m_nReservedPages;
 
-    void checkSize(uint64_t page) {
+    inline void checkSize(uint64_t page) {
         if (page<m_nPages) return;
         if (page>=m_nReservedPages) {
             m_nReservedPages = page+1;
@@ -29,18 +29,18 @@ public:
         for (uint64_t i=0; i<m_nPages; i++) delete pages[i];
         free(pages);
     }
-    void push_back(T e) {
+    inline void push_back(T e) {
         uint64_t page = m_size / m_pageSize;
         checkSize(page);
         pages[page][m_size % m_pageSize] = e;
         m_size++;
     }
-    void push_back() {
+    inline void push_back() {
         uint64_t page = m_size / m_pageSize;
         checkSize(page);
         m_size++;
     }
-    T& operator[](uint64_t idx) { return pages[idx / m_pageSize][idx % m_pageSize]; }
-    uint64_t size() { return m_size; }
+    inline T& operator[](uint64_t idx) { return pages[idx / m_pageSize][idx % m_pageSize]; }
+    inline uint64_t size() { return m_size; }
 };
 #endif // GROWABLE_ARRAY_H

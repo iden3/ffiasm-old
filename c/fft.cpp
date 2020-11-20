@@ -1,5 +1,6 @@
 #include <thread>
 #include <vector>
+#include <omp.h>
 
 using namespace std;
 
@@ -56,7 +57,7 @@ FFT<Field>::FFT(u_int64_t maxDomainSize) {
 
     f.fromMpz(nqr, m_nqr);
 
-    std::cout << "nqr: " << f.toString(nqr) << std::endl;
+    // std::cout << "nqr: " << f.toString(nqr) << std::endl;
 
     s = 1;
     mpz_set(m_aux, m_qm1d2);
@@ -84,12 +85,24 @@ FFT<Field>::FFT(u_int64_t maxDomainSize) {
         mpz_invert(m_aux, m_aux, m_q);
         f.fromMpz(powTwoInv[1], m_aux);
     }
-    for (uint64_t i=2; i<nRoots; i++) {
-        f.mul(roots[i], roots[i-1], roots[1]);
+    #pragma omp parallel
+    {
+        int idThread = omp_get_thread_num();
+        int nThreads = omp_get_num_threads();
+        uint64_t increment = nRoots / nThreads;
+        uint64_t start = idThread==0 ? 2 : idThread * increment;
+        uint64_t end   = idThread==idThread-1 ? nRoots : (idThread+1) * increment;
+        if (end>start) {
+            f.exp(roots[start], roots[1], (uint8_t *)(&start), sizeof(start));
+        }
+        for (uint64_t i=start+1; i<end; i++) {
+            f.mul(roots[i], roots[i-1], roots[1]);
+        }
     }
     Element aux;
     f.mul(aux, roots[nRoots-1], roots[1] );
     assert(f.eq(aux, f.one()));
+
     for (uint64_t i=2; i<=s; i++) {
         f.mul(powTwoInv[i], powTwoInv[i-1], powTwoInv[1]);
     }
@@ -102,8 +115,8 @@ FFT<Field>::FFT(u_int64_t maxDomainSize) {
 
 template <typename Field>
 FFT<Field>::~FFT() {
-    delete roots;
-    delete powTwoInv;
+    delete[] roots;
+    delete[] powTwoInv;
 }
 
 

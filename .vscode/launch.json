@@ -9,12 +9,12 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/prover",
-            "args": ["${workspaceFolder}/../factor/circuit_0000.zkey", "${workspaceFolder}/../factor/witness.wtns", "${workspaceFolder}/../factor/proof.json"],
+            "args": ["${workspaceFolder}/../circuit-2000-32-256-64_0001.zkey", "${workspaceFolder}/../witness.wtns", "${workspaceFolder}/../proof_js.json"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
-            "MIMode": "lldb"
+            "MIMode": "gdb"
         },
         {
             "name": "altbn128_test",
@@ -25,7 +25,7 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
-            "MIMode": "lldb"
+            "MIMode": "gdb"
         },
         {
             "name": "parallelacc_test",
@@ -36,7 +36,7 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
-            "MIMode": "lldb"
+            "MIMode": "gdb"
         }
     ]
 }

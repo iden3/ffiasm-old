@@ -3,6 +3,7 @@
 #include "exp.hpp"
 // #include "multiexp.hpp"
 #include "multiexp2.hpp"
+#include "par_multiexp.hpp"
 
 template <typename BaseField>
 class Curve {
@@ -116,9 +117,14 @@ public:
         nafMulByScalar<Curve<BaseField>, PointAffine, Point>(*this, r, base, scalar, scalarSize);
     }
 
-    void multiMulByScalar(Point &r, PointAffine *bases, uint8_t* scalars, unsigned int scalarSize, unsigned int n) {
+    void multiMulByScalar_old(Point &r, PointAffine *bases, uint8_t* scalars, unsigned int scalarSize, unsigned int n) {
         MultByScalar::fastMultiMulByScalar<Curve<BaseField>, Point, PointAffine>(*this, r, bases, scalars, scalarSize, n);
         // MultByScalar::nafMultiMulByScalar<Curve<BaseField>, Point, PointAffine>(*this, r, bases, scalars, scalarSize, n);
+    }
+
+    void multiMulByScalar(Point &r, PointAffine *bases, uint8_t* scalars, unsigned int scalarSize, unsigned int n, unsigned int nThreads=0) {
+        ParallelMultiexp<Curve<BaseField>> pm(*this);
+        pm.multiexp(r, bases, scalars, scalarSize, n);
     }
 
 #ifdef COUNT_OPS

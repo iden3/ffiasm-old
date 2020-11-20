@@ -44,14 +44,25 @@ std::unique_ptr<Prover<Engine>> makeProver(
 template <typename Engine>
 std::unique_ptr<Proof<Engine>> Prover<Engine>::prove(typename Engine::FrElement *wtns) {
 
-    auto a = new typename Engine::FrElement[domainSize]();
-    auto b = new typename Engine::FrElement[domainSize]();
+    std::cout << "Start Initializing a b c A\n";
+    auto a = new typename Engine::FrElement[domainSize];
+    auto b = new typename Engine::FrElement[domainSize];
     auto c = new typename Engine::FrElement[domainSize];
 
-    typename Engine::FrElement aux;
+    #pragma omp parallel for
+    for (u_int32_t i=0; i<domainSize; i++) {
+        E.fr.copy(a[i], E.fr.zero());
+        E.fr.copy(b[i], E.fr.zero());
+    }
 
+    std::cout << "Processing coefs\n";
+    #define NLOCKS 1024
+    omp_lock_t locks[NLOCKS];
+    for (int i=0; i<NLOCKS; i++) omp_init_lock(&locks[i]);
+    #pragma omp parallel for 
     for (u_int64_t i=0; i<nCoefs; i++) {
         typename Engine::FrElement *ab = (coefs[i].m == 0) ? a : b;
+        typename Engine::FrElement aux;
 
         E.fr.mul(
             aux,
@@ -59,14 +70,20 @@ std::unique_ptr<Proof<Engine>> Prover<Engine>::prove(typename Engine::FrElement 
             coefs[i].coef
         );
 
+        omp_set_lock(&locks[coefs[i].c % NLOCKS]);
         E.fr.add(
             ab[coefs[i].c],
             ab[coefs[i].c],
             aux
         );
+        omp_unset_lock(&locks[coefs[i].c % NLOCKS]);
     }
+    for (int i=0; i<NLOCKS; i++) omp_destroy_lock(&locks[i]);
 
-    for (u_int32_t i=0; i<nVars; i++) {
+
+    std::cout << "Calculating c\n";
+    #pragma omp parallel for
+    for (u_int32_t i=0; i<domainSize; i++) {
         E.fr.mul(
             c[i],
             a[i],
@@ -74,58 +91,113 @@ std::unique_ptr<Proof<Engine>> Prover<Engine>::prove(typename Engine::FrElement 
         );
     }
 
+
+    std::cout << "Initializing fft\n";
+    uint32_t fftThreads = 128;
     FFT<typename Engine::Fr> fft(domainSize*2);
     u_int32_t domainPower = fft.log2(domainSize);
 
-
-    fft.ifft(a, domainSize, 64);
+    std::cout << "Start iFFT A\n";
+    fft.ifft(a, domainSize, fftThreads);
+    cout << "a After ifft:" << endl;
     cout << E.fr.toString(a[0]) << endl;
     cout << E.fr.toString(a[1]) << endl;
+    std::cout << "Start Shift A\n";
+    #pragma omp parallel for
     for (u_int64_t i=0; i<domainSize; i++) {
         E.fr.mul(a[i], a[i], fft.root(domainPower+1, i));
     }
-    fft.fft(a, domainSize, 64);
+    cout << "a After shift:" << endl;
+    cout << E.fr.toString(a[0]) << endl;
+    cout << E.fr.toString(a[1]) << endl;
+    std::cout << "Start FFT A\n";
+    fft.fft(a, domainSize, fftThreads);
+    cout << "a After fft:" << endl;
+    cout << E.fr.toString(a[0]) << endl;
+    cout << E.fr.toString(a[1]) << endl;
 
-    fft.ifft(b, domainSize, 64);
+    std::cout << "Start iFFT B\n";
+    fft.ifft(b, domainSize, fftThreads);
+    cout << "b After ifft:" << endl;
+    cout << E.fr.toString(b[0]) << endl;
+    cout << E.fr.toString(b[1]) << endl;
+    std::cout << "Start Shift B\n";
+    #pragma omp parallel for
     for (u_int64_t i=0; i<domainSize; i++) {
         E.fr.mul(b[i], b[i], fft.root(domainPower+1, i));
     }
-    fft.fft(b, domainSize, 64);
+    cout << "b After shift:" << endl;
+    cout << E.fr.toString(b[0]) << endl;
+    cout << E.fr.toString(b[1]) << endl;
+    std::cout << "Start FFT B\n";
+    fft.fft(b, domainSize, fftThreads);
+    cout << "b After fft:" << endl;
+    cout << E.fr.toString(b[0]) << endl;
+    cout << E.fr.toString(b[1]) << endl;
 
-    fft.ifft(c, domainSize, 64);
+    std::cout << "Start iFFT C\n";
+    fft.ifft(c, domainSize, fftThreads);
+    cout << "c After ifft:" << endl;
+    cout << E.fr.toString(c[0]) << endl;
+    cout << E.fr.toString(c[1]) << endl;
+    std::cout << "Start Shift C\n";
+    #pragma omp parallel for
     for (u_int64_t i=0; i<domainSize; i++) {
         E.fr.mul(c[i], c[i], fft.root(domainPower+1, i));
     }
-    fft.fft(c, domainSize, 64);
+    cout << "c After shift:" << endl;
+    cout << E.fr.toString(c[0]) << endl;
+    cout << E.fr.toString(c[1]) << endl;
+    std::cout << "Start FFT C\n";
+    fft.fft(c, domainSize, fftThreads);
+    cout << "c After fft:" << endl;
+    cout << E.fr.toString(c[0]) << endl;
+    cout << E.fr.toString(c[1]) << endl;
 
+
+    std::cout << "Start ABC\n";
+    #pragma omp parallel for
     for (u_int64_t i=0; i<domainSize; i++) {
         E.fr.mul(a[i], a[i], b[i]);
         E.fr.sub(a[i], a[i], c[i]);
         E.fr.fromMontgomery(a[i], a[i]);
     }
+    cout << "abc:" << endl;
+    cout << E.fr.toString(a[0]) << endl;
+    cout << E.fr.toString(a[1]) << endl;
 
     delete b;
     delete c;
 
+    std::cout << "Start Multiexp H\n";
     typename Engine::G1Point pih;
     E.g1.multiMulByScalar(pih, pointsH, (uint8_t *)a, sizeof(a[0]), domainSize);
-
-    cout << E.g1.toString(pih);
+    cout << "pih: " << E.g1.toString(pih) << "\n";
 
     delete a;
 
+
+    std::cout << "Start Multiexp A\n";
     uint32_t sW = sizeof(wtns[0]);
     typename Engine::G1Point pi_a;
     E.g1.multiMulByScalar(pi_a, pointsA, (uint8_t *)wtns, sW, nVars);
+    cout << "pi_a: " << E.g1.toString(pi_a) << "\n";
 
+
+    std::cout << "Start Multiexp B1\n";
     typename Engine::G1Point pib1;
     E.g1.multiMulByScalar(pib1, pointsB1, (uint8_t *)wtns, sW, nVars);
+    cout << "pib1: " << E.g1.toString(pib1) << "\n";
 
+    std::cout << "Start Multiexp B2\n";
     typename Engine::G2Point pi_b;
     E.g2.multiMulByScalar(pi_b, pointsB2, (uint8_t *)wtns, sW, nVars);
+    cout << "pi_b: " << E.g2.toString(pi_b) << "\n";
 
+    std::cout << "Start Multiexp C\n";
     typename Engine::G1Point pi_c;
     E.g1.multiMulByScalar(pi_c, pointsC, (uint8_t *)((uint64_t)wtns + (nPublic +1)*sW), sW, nVars-nPublic-1);
+    cout << "pi_c: " << E.g1.toString(pi_c) << "\n";
 
     typename Engine::FrElement r;
     typename Engine::FrElement s;
@@ -176,10 +248,11 @@ template <typename Engine>
 std::string Proof<Engine>::toJson() {
 
     std::ostringstream ss;
-    ss << "{ A:[\"" << E.f1.toString(A.x) << "\",\"" << E.f1.toString(A.y) << "\",\"1\"], ";
-    ss << " B: [[\"" << E.f1.toString(B.x.a) << "\",\"" << E.f1.toString(B.x.b) << "\"],[\"" << E.f1.toString(B.y.a) << "\",\"" << E.f1.toString(B.y.b) << "\", [\"1\",\"0\"]], ";
-    ss << " C: [\"" << E.f1.toString(C.x) << "\",\"" << E.f1.toString(C.y) << "\",\"1\"] }";
-    
+    ss << "{ \"pi_a\":[\"" << E.f1.toString(A.x) << "\",\"" << E.f1.toString(A.y) << "\",\"1\"], ";
+    ss << " \"pi_b\": [[\"" << E.f1.toString(B.x.a) << "\",\"" << E.f1.toString(B.x.b) << "\"],[\"" << E.f1.toString(B.y.a) << "\",\"" << E.f1.toString(B.y.b) << "\"], [\"1\",\"0\"]], ";
+    ss << " \"pi_c\": [\"" << E.f1.toString(C.x) << "\",\"" << E.f1.toString(C.y) << "\",\"1\"], ";
+    ss << " \"protocol\":\"groth16\" }";
+        
     return ss.str();
 }
 

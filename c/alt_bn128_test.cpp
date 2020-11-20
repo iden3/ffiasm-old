@@ -82,6 +82,7 @@ TEST(altBn128, g1_times_3_exp) {
     uint8_t scalar[32];
     for (int i=0;i<32;i++) scalar[i] = 0;
     mpz_export((void *)scalar, NULL, -1, 8, -1, 0, e);
+    mpz_clear(e);
 
     G1Point p2;
     G1.mulByScalar(p2, G1.one(), scalar, 32);
@@ -126,6 +127,7 @@ TEST(altBn128, g1_times_65_exp) {
     uint8_t scalar[32];
     for (int i=0;i<32;i++) scalar[i] = 0;
     mpz_export((void *)scalar, NULL, -1, 8, -1, 0, e);
+    mpz_clear(e);
 
     G1Point p2;
     G1.mulByScalar(p2, G1.one(), scalar, 32);
@@ -141,6 +143,7 @@ TEST(altBn128, g1_expToOrder) {
 
     for (int i=0;i<32;i++) scalar[i] = 0;
     mpz_export((void *)scalar, NULL, -1, 8, -1, 0, e);
+    mpz_clear(e);
 
     G1Point p1;
 
@@ -157,6 +160,7 @@ TEST(altBn128, g2_expToOrder) {
 
     for (int i=0;i<32;i++) scalar[i] = 0;
     mpz_export((void *)scalar, NULL, -1, 8, -1, 0, e);
+    mpz_clear(e);
 
     Curve<F2Field<RawFq>>::Point p1;
 
@@ -167,14 +171,14 @@ TEST(altBn128, g2_expToOrder) {
 
 TEST(altBn128, multiExp) {
 
-    int NMExp = 10;
+    int NMExp = 40000;
 
     typedef uint8_t Scalar[32];
 
     Scalar *scalars = new Scalar[NMExp];
     G1PointAffine *bases = new G1PointAffine[NMExp];
 
-    int acc=0;
+    uint64_t acc=0;
     for (int i=0; i<NMExp; i++) {
         if (i==0) {
             G1.copy(bases[0], G1.one());
@@ -182,7 +186,7 @@ TEST(altBn128, multiExp) {
             G1.add(bases[i], bases[i-1], G1.one());
         }
         for (int j=0; j<32; j++) scalars[i][j] = 0;
-        scalars[i][0] = i+1;
+        *(int *)&scalars[i][0] = i+1;
         acc += (i+1)*(i+1);
     }
 
@@ -196,14 +200,15 @@ TEST(altBn128, multiExp) {
 
     for (int i=0;i<32;i++) sAcc[i] = 0;
     mpz_export((void *)sAcc, NULL, -1, 8, -1, 0, e);
+    mpz_clear(e);
 
     G1Point p2;
     G1.mulByScalar(p2, G1.one(), sAcc, 32);
 
     ASSERT_TRUE(G1.eq(p1, p2));
 
-    delete bases;
-    delete scalars;
+    delete[] bases;
+    delete[] scalars;
 }
 
 
@@ -238,8 +243,8 @@ TEST(altBn128, multiExp2) {
 
     ASSERT_TRUE(G1.eq(ra, ref));
 
-    delete bases;
-    delete scalars;
+    delete[] bases;
+    delete[] scalars;
 }
 
 TEST(altBn128, fft) {
@@ -262,7 +267,7 @@ TEST(altBn128, fft) {
         ASSERT_TRUE(Fr.eq(a[i], aux));
     }
 
-    delete a;
+    delete[] a;
 }
 
 
