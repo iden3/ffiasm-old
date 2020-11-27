@@ -12,6 +12,10 @@ class GrowableArrayMT {
         Page *next;
     };
 
+    struct PageList {
+        Page *p;
+    };
+
 public:
     struct Iterator {
         GrowableArrayMT *ga;
@@ -30,7 +34,7 @@ public:
                 if (idThread == ga->nThreads) {
                     return;
                 }
-                page = ga->th2page[idThread];
+                page = ga->th2page[idThread].p;
             }
         }
 
@@ -71,22 +75,22 @@ public:
 
 private:
 
+    PageList *th2page;
     uint32_t m_pageSize;
-    Page **th2page;
     uint32_t nThreads;
 
 public:
     GrowableArrayMT(uint32_t _nThreads, uint64_t _pageSize = 1<<18) {
         nThreads = _nThreads==0 ? std::thread::hardware_concurrency() : _nThreads;
         m_pageSize = _pageSize;
-        th2page = new Page *[nThreads]();
+        th2page = new PageList[nThreads]();
     };
 
     ~GrowableArrayMT() {
         for (uint32_t i=0; i<nThreads; i++) {
-            while (th2page[i]) {
-                Page *p = th2page[i];
-                th2page[i] = p->next;
+            while (th2page[i].p) {
+                Page *p = th2page[i].p;
+                th2page[i].p = p->next;
                 delete[] p->elements;
                 delete p;
             }
@@ -98,20 +102,20 @@ public:
         if (idThread >= nThreads) {
             throw std::range_error("Thread out of range");
         }
-        if ((!th2page[idThread]) || (th2page[idThread]->n ==  m_pageSize)) {
+        if ((!th2page[idThread].p) || (th2page[idThread].p->n ==  m_pageSize)) {
             Page *p= new Page;
             p->n =0;
-            p->elements = new T[m_pageSize];
-            p->next = th2page[idThread];
-            th2page[idThread] = p;
+            p->elements = new T[m_pageSize+64];
+            p->next = th2page[idThread].p;
+            th2page[idThread].p = p;
         }
-        return th2page[idThread]->elements[th2page[idThread]->n++];
+        return th2page[idThread].p->elements[th2page[idThread].p->n++];
     }
     Iterator begin() {
         Iterator it;
         it.ga = this;
         it.idThread = 0;
-        it.page = th2page[0];
+        it.page = th2page[0].p;
         it.idx = 0;
         it.adjustIterator();
         return it;

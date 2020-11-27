@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <system_error>
 #include <string>
+#include <memory.h>
 
 #include "binfile_utils.hpp"
 
@@ -23,7 +24,10 @@ BinFile::BinFile(std::string fileName, std::string _type, uint32_t maxVersion) {
         throw std::system_error(errno, std::generic_category(), "fstat");
 
     size = sb.st_size;
-    addr = (char *)mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0);
+    void *addrmm = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0);
+    addr = malloc(sb.st_size);
+    memcpy(addr, addrmm, sb.st_size);
+    munmap(addrmm, sb.st_size);
     close(fd);
 
     type.assign((const char *)addr, 4);
@@ -59,7 +63,7 @@ BinFile::BinFile(std::string fileName, std::string _type, uint32_t maxVersion) {
 }
 
 BinFile::~BinFile() {
-    munmap(addr, size);
+    free(addr);
 }
 
 void BinFile::startReadSection(u_int32_t sectionId, u_int32_t sectionPos) {

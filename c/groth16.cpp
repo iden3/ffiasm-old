@@ -91,69 +91,68 @@ std::unique_ptr<Proof<Engine>> Prover<Engine>::prove(typename Engine::FrElement 
         );
     }
 
-
     std::cout << "Initializing fft\n";
-    uint32_t fftThreads = 128;
-    FFT<typename Engine::Fr> fft(domainSize*2);
-    u_int32_t domainPower = fft.log2(domainSize);
+    FFT<typename Engine::Fr> *fft = new FFT<typename Engine::Fr>(domainSize*2);
+    u_int32_t domainPower = fft->log2(domainSize);
 
     std::cout << "Start iFFT A\n";
-    fft.ifft(a, domainSize, fftThreads);
+    fft->ifft(a, domainSize);
     cout << "a After ifft:" << endl;
     cout << E.fr.toString(a[0]) << endl;
     cout << E.fr.toString(a[1]) << endl;
     std::cout << "Start Shift A\n";
     #pragma omp parallel for
     for (u_int64_t i=0; i<domainSize; i++) {
-        E.fr.mul(a[i], a[i], fft.root(domainPower+1, i));
+        E.fr.mul(a[i], a[i], fft->root(domainPower+1, i));
     }
     cout << "a After shift:" << endl;
     cout << E.fr.toString(a[0]) << endl;
     cout << E.fr.toString(a[1]) << endl;
     std::cout << "Start FFT A\n";
-    fft.fft(a, domainSize, fftThreads);
+    fft->fft(a, domainSize);
     cout << "a After fft:" << endl;
     cout << E.fr.toString(a[0]) << endl;
     cout << E.fr.toString(a[1]) << endl;
 
     std::cout << "Start iFFT B\n";
-    fft.ifft(b, domainSize, fftThreads);
+    fft->ifft(b, domainSize);
     cout << "b After ifft:" << endl;
     cout << E.fr.toString(b[0]) << endl;
     cout << E.fr.toString(b[1]) << endl;
     std::cout << "Start Shift B\n";
     #pragma omp parallel for
     for (u_int64_t i=0; i<domainSize; i++) {
-        E.fr.mul(b[i], b[i], fft.root(domainPower+1, i));
+        E.fr.mul(b[i], b[i], fft->root(domainPower+1, i));
     }
     cout << "b After shift:" << endl;
     cout << E.fr.toString(b[0]) << endl;
     cout << E.fr.toString(b[1]) << endl;
     std::cout << "Start FFT B\n";
-    fft.fft(b, domainSize, fftThreads);
+    fft->fft(b, domainSize);
     cout << "b After fft:" << endl;
     cout << E.fr.toString(b[0]) << endl;
     cout << E.fr.toString(b[1]) << endl;
 
     std::cout << "Start iFFT C\n";
-    fft.ifft(c, domainSize, fftThreads);
+    fft->ifft(c, domainSize);
     cout << "c After ifft:" << endl;
     cout << E.fr.toString(c[0]) << endl;
     cout << E.fr.toString(c[1]) << endl;
     std::cout << "Start Shift C\n";
     #pragma omp parallel for
     for (u_int64_t i=0; i<domainSize; i++) {
-        E.fr.mul(c[i], c[i], fft.root(domainPower+1, i));
+        E.fr.mul(c[i], c[i], fft->root(domainPower+1, i));
     }
     cout << "c After shift:" << endl;
     cout << E.fr.toString(c[0]) << endl;
     cout << E.fr.toString(c[1]) << endl;
     std::cout << "Start FFT C\n";
-    fft.fft(c, domainSize, fftThreads);
+    fft->fft(c, domainSize);
     cout << "c After fft:" << endl;
     cout << E.fr.toString(c[0]) << endl;
     cout << E.fr.toString(c[1]) << endl;
 
+    delete fft;
 
     std::cout << "Start ABC\n";
     #pragma omp parallel for
@@ -176,13 +175,11 @@ std::unique_ptr<Proof<Engine>> Prover<Engine>::prove(typename Engine::FrElement 
 
     delete a;
 
-
     std::cout << "Start Multiexp A\n";
     uint32_t sW = sizeof(wtns[0]);
     typename Engine::G1Point pi_a;
     E.g1.multiMulByScalar(pi_a, pointsA, (uint8_t *)wtns, sW, nVars);
     cout << "pi_a: " << E.g1.toString(pi_a) << "\n";
-
 
     std::cout << "Start Multiexp B1\n";
     typename Engine::G1Point pib1;

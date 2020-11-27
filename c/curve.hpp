@@ -3,7 +3,7 @@
 #include "exp.hpp"
 // #include "multiexp.hpp"
 #include "multiexp2.hpp"
-#include "par_multiexp.hpp"
+#include "par_multiexp2.hpp"
 
 template <typename BaseField>
 class Curve {

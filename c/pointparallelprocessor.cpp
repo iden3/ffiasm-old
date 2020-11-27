@@ -43,11 +43,10 @@ void PointParallelProcessor<Curve>::addOp(uint32_t idThread, uint32_t level, Fun
 
 template <typename Curve>
 typename PointParallelProcessor<Curve>::Point PointParallelProcessor<Curve>::allocHeapPoint(uint32_t idThread, uint32_t level) {
-    Point p(
-        HEAP,
-        level,
-        (void *)&heap->addElement(idThread)
-    );
+    Point p;
+    p.source = HEAP;
+    p.level = level;
+    p.p = (void *)&heap->addElement(idThread);
     return p;
 }
 

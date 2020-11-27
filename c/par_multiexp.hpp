@@ -5,7 +5,7 @@
 #define PME_PACK_FACTOR 2
 #define PME_MAX_CHUNK_SIZE_BITS 20
 #define PME_MIN_CHUNK_SIZE_BITS 2
-#define TREES_PER_PAGE 1<<20
+#define TREES_PER_PAGE 1<<16
 
 template <typename Curve>
 class ParallelMultiexp {
@@ -20,7 +20,7 @@ class ParallelMultiexp {
 
     struct TreeList {
         Tree *trees;
-        uint8_t padding[4096];
+        uint8_t padding[128];
     };
 
     struct TreePage {
@@ -31,7 +31,7 @@ class ParallelMultiexp {
 
     struct TreePageList {
         TreePage *pages;
-        uint8_t padding[4096];
+        uint8_t padding[128];
     };
 
 
@@ -44,6 +44,7 @@ class ParallelMultiexp {
     uint32_t nThreads;
     uint32_t bitsPerChunk;
     uint64_t accsPerChunk;
+    uint64_t accsPerChunkS;
     uint32_t nChunks;
     TreePageList *treePages;
     TreeList *freeTrees;

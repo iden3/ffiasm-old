@@ -29,7 +29,8 @@ static inline u_int64_t BR(u_int64_t x, u_int64_t domainPow)
 #define ROOT(s,j) (rootsOfUnit[(1<<(s))+(j)])
 
 template <typename Field>
-FFT<Field>::FFT(u_int64_t maxDomainSize) {
+FFT<Field>::FFT(u_int64_t maxDomainSize, uint32_t _nThreads) {
+    nThreads = _nThreads==0 ? omp_get_max_threads() : _nThreads;
     f = Field::field;
 
     u_int32_t domainPow = log2(maxDomainSize);
@@ -91,7 +92,7 @@ FFT<Field>::FFT(u_int64_t maxDomainSize) {
         int nThreads = omp_get_num_threads();
         uint64_t increment = nRoots / nThreads;
         uint64_t start = idThread==0 ? 2 : idThread * increment;
-        uint64_t end   = idThread==idThread-1 ? nRoots : (idThread+1) * increment;
+        uint64_t end   = idThread==nThreads-1 ? nRoots : (idThread+1) * increment;
         if (end>start) {
             f.exp(roots[start], roots[1], (uint8_t *)(&start), sizeof(start));
         }
@@ -135,7 +136,7 @@ void FFT<Field>::reversePermutationInnerLoop(Element *a, u_int64_t from, u_int64
 
 
 template <typename Field>
-void FFT<Field>::reversePermutation(Element *a, u_int64_t n, u_int32_t nThreads) {
+void FFT<Field>::reversePermutation(Element *a, u_int64_t n) {
     int domainPow = log2(n);
     std::vector<std::thread> threads(nThreads-1);
     u_int64_t increment = n / nThreads;
@@ -171,8 +172,8 @@ void FFT<Field>::fftInnerLoop(Element *a, u_int64_t from, u_int64_t to, u_int32_
 }
 
 template <typename Field>
-void FFT<Field>::fft(Element *a, u_int64_t n, u_int32_t nThreads ) {
-    reversePermutation(a, n, nThreads);
+void FFT<Field>::fft(Element *a, u_int64_t n) {
+    reversePermutation(a, n);
     u_int64_t domainPow =log2(n);
     assert(((u_int64_t)1 << domainPow) == n);
     std::vector<std::thread> threads(nThreads-1);
@@ -207,8 +208,8 @@ void FFT<Field>::finalInverseInner(Element *a, u_int64_t from, u_int64_t to, u_i
 }
 
 template <typename Field>
-void FFT<Field>::ifft(Element *a, u_int64_t n, u_int32_t nThreads ) {
-    fft(a, n, nThreads);
+void FFT<Field>::ifft(Element *a, u_int64_t n ) {
+    fft(a, n);
     u_int64_t domainPow =log2(n);
     std::vector<std::thread> threads(nThreads-1);
     u_int64_t increment = ((n-1) >> 1) / nThreads;

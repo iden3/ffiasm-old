@@ -26,16 +26,13 @@ class PointParallelProcessor {
 public:
     enum Source { ZERO=0, BASE=1, HEAP=2};
 
-    #pragma pack(push, 1)
+//    #pragma pack(push, 1)
     struct Point {
         Source source;
         uint16_t level;
         void *p;
-
-        Point (Source _source, uint16_t _level, void *_p) : source(_source), level(_level), p(_p) {};
-        Point() {}
     };
-    #pragma pack(pop)
+//    #pragma pack(pop)
 
 private:
     typename Curve::PointAffine *bases;
@@ -88,8 +85,19 @@ public:
     void calculate();
 
     void extractResult(typename Curve::Point &r, Point &v);
-    inline Point basePoint(uint32_t idx) { return Point(BASE, 0, &bases[idx]); };
-    inline Point zero() { return Point(ZERO, 0, (void *)&(curve.zero())); };
+    inline Point basePoint(uint32_t idx) { 
+        Point p;
+        p.source = BASE;
+        p.level = 0;
+        p.p = &bases[idx];
+        return p; 
+    };
+    inline Point zero() { 
+        Point p;
+        p.source = ZERO;
+        p.level = 0;
+        return p; 
+    };
 };
 
 #include "pointparallelprocessor.cpp"

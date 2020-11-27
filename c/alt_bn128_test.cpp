@@ -258,8 +258,8 @@ TEST(altBn128, fft) {
 
     FFT<typename Engine::Fr> fft(NMExp);
 
-    fft.fft(a, NMExp, 64);
-    fft.ifft(a, NMExp, 64);
+    fft.fft(a, NMExp);
+    fft.ifft(a, NMExp);
 
     AltBn128::FrElement aux;
     for (int i=0; i<NMExp; i++) {

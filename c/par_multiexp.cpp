@@ -5,8 +5,8 @@ template <typename Curve>
 void ParallelMultiexp<Curve>::packThreadsInner(uint32_t idThread, uint32_t start, uint32_t end) {
     for (uint32_t i=start; i<end; i++) {
         for (uint32_t j=1; j<nThreads; j++) {
-            if (accs[j*accsPerChunk+i]) {
-                accs[i] = addTrees(idThread, accs[i], accs[j*accsPerChunk+i]);
+            if (accs[j*accsPerChunkS+i]) {
+                accs[i] = addTrees(idThread, accs[i], accs[j*accsPerChunkS+i]);
             }
         }
     }
@@ -37,7 +37,7 @@ void ParallelMultiexp<Curve>::reduceInner(uint32_t idThread, uint32_t nBits, uin
     for (uint32_t i = start == 0 ? 1 : start; i<end; i++) {
         p = getPoint(idThread, accs[h+i]);
         accs[i] = addPoint(idThread, accs[i], p);
-        accs[idThread*accsPerChunk + h] = addPoint(idThread, accs[idThread*accsPerChunk + h], p);
+        accs[idThread*accsPerChunkS + h] = addPoint(idThread, accs[idThread*accsPerChunkS + h], p);
     }
 }
 
@@ -47,7 +47,7 @@ typename ParallelMultiexp<Curve>::Point ParallelMultiexp<Curve>::reduce(uint32_t
     uint32_t ndiv2 = 1 << (nBits-1);
 
     for (u_int32_t i=1; i<nThreads; i++) {
-        accs[i*accsPerChunk + ndiv2] = NULL;
+        accs[i*accsPerChunkS + ndiv2] = NULL;
     }
 
     u_int64_t increment = ndiv2 / nThreads;
@@ -65,7 +65,7 @@ typename ParallelMultiexp<Curve>::Point ParallelMultiexp<Curve>::reduce(uint32_t
     }
     Point p1 = reduce(nBits-1);
     for (u_int32_t i=1; i<nThreads; i++) {
-        accs[ndiv2] = addTrees(0, accs[ndiv2], accs[i*accsPerChunk+ndiv2]);
+        accs[ndiv2] = addTrees(0, accs[ndiv2], accs[i*accsPerChunkS+ndiv2]);
     }
     Point p2 = getPoint(0, accs[ndiv2]);
     for (u_int32_t i=0; i<nBits-1; i++) p2 = prc->add(0, p2, p2);
@@ -83,7 +83,7 @@ void ParallelMultiexp<Curve>::initTrees() {
         treePages[i].pages=NULL;
         freeTrees[i].trees=NULL;
         for (uint32_t j=0; j<accsPerChunk; j++) {
-            accs[i*accsPerChunk+j]=NULL;
+            accs[i*accsPerChunkS+j]=NULL;
         }
     }
 }
@@ -185,21 +185,22 @@ uint32_t ParallelMultiexp<Curve>::getChunk(uint32_t scalarIdx, uint32_t chunkIdx
     return uint32_t(v);
 }
 
-/*
+
 template <typename Curve>
 void ParallelMultiexp<Curve>::processChunkInner(uint32_t idThread, uint32_t idChunk, uint32_t start, uint32_t end) {
     for(uint32_t i=start; i<end; i++) {
         if (g.isZero(bases[i])) continue;
         uint32_t chunkValue = getChunk(i, idChunk);
         if (chunkValue) {
-            Tree *t = addPoint(idThread, accs[idThread*accsPerChunk+chunkValue], prc->basePoint(i));
-            accs[idThread*accsPerChunk+chunkValue] = t;
+            Tree *t = addPoint(idThread, accs[idThread*accsPerChunkS+chunkValue], prc->basePoint(i));
+            accs[idThread*accsPerChunkS+chunkValue] = t;
         }
     }
 }
 
 template <typename Curve>
 void ParallelMultiexp<Curve>::processChunk(uint32_t idChunk) {
+    int nThreads = 1;
     u_int64_t increment = n / nThreads;
     std::vector<std::thread> threads(nThreads-1);
     if (increment) {
@@ -214,8 +215,9 @@ void ParallelMultiexp<Curve>::processChunk(uint32_t idChunk) {
         }
     }
 }
-*/
 
+
+/*
 template <typename Curve>
 void ParallelMultiexp<Curve>::processChunk(uint32_t idChunk) {
     #pragma omp parallel for
@@ -224,10 +226,11 @@ void ParallelMultiexp<Curve>::processChunk(uint32_t idChunk) {
         if (g.isZero(bases[i])) continue;
         uint32_t chunkValue = getChunk(i, idChunk);
         if (chunkValue) {
-            accs[idThread*accsPerChunk+chunkValue] = addPoint(idThread, accs[idThread*accsPerChunk+chunkValue], prc->basePoint(i));
+            accs[idThread*accsPerChunkS+chunkValue] = addPoint(idThread, accs[idThread*accsPerChunkS+chunkValue], prc->basePoint(i));
         }
     }
 }
+*/
 
 
 template <typename Curve>
@@ -253,9 +256,10 @@ void ParallelMultiexp<Curve>::multiexp(typename Curve::Point &r, typename Curve:
     if (bitsPerChunk < PME_MIN_CHUNK_SIZE_BITS) bitsPerChunk = PME_MIN_CHUNK_SIZE_BITS;
     nChunks = ((scalarSize*8 - 1 ) / bitsPerChunk)+1;
     accsPerChunk = 1 << bitsPerChunk;  // In the chunks last bit is always zero.
+    accsPerChunkS = accsPerChunk+64;
 
     typename Curve::Point *chunkResults = new typename Curve::Point[nChunks];
-    accs = new Tree *[nThreads*accsPerChunk];
+    accs = new Tree *[nThreads*accsPerChunkS];
 
     for (uint32_t i=0; i<nChunks; i++) {
         std::cout << "Allocating: " << i << "\n"; 
@@ -289,3 +293,4 @@ void ParallelMultiexp<Curve>::multiexp(typename Curve::Point &r, typename Curve:
 
     delete[] chunkResults; 
 }
+
