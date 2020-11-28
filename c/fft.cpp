@@ -120,7 +120,7 @@ FFT<Field>::~FFT() {
     delete[] powTwoInv;
 }
 
-
+/*
 template <typename Field>
 void FFT<Field>::reversePermutationInnerLoop(Element *a, u_int64_t from, u_int64_t to, u_int32_t domainPow) {
     Element tmp;
@@ -152,58 +152,45 @@ void FFT<Field>::reversePermutation(Element *a, u_int64_t n) {
         }
     }
 }
+*/
 
 
 template <typename Field>
-void FFT<Field>::fftInnerLoop(Element *a, u_int64_t from, u_int64_t to, u_int32_t s) {
-    Element t;
-    Element u;
-    u_int64_t m = 1 << s;
-    u_int64_t mdiv2 = m >> 1;
-    for (u_int64_t i=from; i<to; i++) {
-        u_int64_t k=(i/mdiv2)*m;
-        u_int64_t j=i%mdiv2;
-
-        f.mul(t, root(s, j), a[k+j+mdiv2]);
-        f.copy(u,a[k+j]);
-        f.add(a[k+j], t, u);
-        f.sub(a[k+j+mdiv2], u, t);
+void FFT<Field>::reversePermutation(Element *a, u_int64_t n) {
+    int domainPow = log2(n);
+    #pragma omp parallel for
+    for (u_int64_t i=0; i<n; i++) {
+        Element tmp;
+        u_int64_t r = BR(i, domainPow);
+        if (i>r) {
+            f.copy(tmp, a[i]);
+            f.copy(a[i], a[r]);
+            f.copy(a[r], tmp);
+        }
     }
 }
+
 
 template <typename Field>
 void FFT<Field>::fft(Element *a, u_int64_t n) {
     reversePermutation(a, n);
     u_int64_t domainPow =log2(n);
     assert(((u_int64_t)1 << domainPow) == n);
-    std::vector<std::thread> threads(nThreads-1);
     for (u_int32_t s=1; s<=domainPow; s++) {
-        u_int64_t increment = (n>>1) / nThreads;
-        if (increment) {
-            for (u_int64_t i=0; i<nThreads-1; i++) {
-                threads[i] = std::thread (&FFT<Field>::fftInnerLoop, this, a, i*increment, (i+1)*increment, s);
-            }
+        u_int64_t m = 1 << s;
+        u_int64_t mdiv2 = m >> 1;
+        #pragma omp parallel for
+        for (u_int64_t i=0; i< (n>>1); i++) {
+            Element t;
+            Element u;
+            u_int64_t k=(i/mdiv2)*m;
+            u_int64_t j=i%mdiv2;
+
+            f.mul(t, root(s, j), a[k+j+mdiv2]);
+            f.copy(u,a[k+j]);
+            f.add(a[k+j], t, u);
+            f.sub(a[k+j+mdiv2], u, t);
         }
-        fftInnerLoop(a, (nThreads-1)*increment, n>>1 , s);
-        if (increment) {
-            for (u_int32_t i=0; i<nThreads-1; i++) {
-                if (threads[i].joinable()) threads[i].join();
-            }
-        }
-    }
-}
-
-
-
-template <typename Field>
-void FFT<Field>::finalInverseInner(Element *a, u_int64_t from, u_int64_t to, u_int32_t domainPow) {
-    Element tmp;
-    u_int64_t n = (u_int64_t)1 << domainPow;
-    for (u_int64_t i=from; i<to; i++) {
-        u_int64_t r = n-i;
-        f.copy(tmp, a[i]);
-        f.mul(a[i], a[r], powTwoInv[domainPow]);
-        f.mul(a[r], tmp, powTwoInv[domainPow]);
     }
 }
 
@@ -211,22 +198,20 @@ template <typename Field>
 void FFT<Field>::ifft(Element *a, u_int64_t n ) {
     fft(a, n);
     u_int64_t domainPow =log2(n);
-    std::vector<std::thread> threads(nThreads-1);
-    u_int64_t increment = ((n-1) >> 1) / nThreads;
-    if (increment) {
-        for (u_int64_t i=0; i<nThreads-1; i++) {
-            threads[i] = std::thread (&FFT<Field>::finalInverseInner, this, a, i*increment+1, (i+1)*increment+1, domainPow);
-        }
-    }
-    finalInverseInner(a, (nThreads-1)*increment+1, ((n-1) >> 1) +1, domainPow);
+    u_int64_t nDiv2= n >> 1; 
+    #pragma omp parallel for
+    for (u_int64_t i=1; i<nDiv2; i++) {
+        Element tmp;
+        u_int64_t r = n-i;
+        f.copy(tmp, a[i]);
+        f.mul(a[i], a[r], powTwoInv[domainPow]);
+        f.mul(a[r], tmp, powTwoInv[domainPow]);
+    } 
     f.mul(a[0], a[0], powTwoInv[domainPow]);
     f.mul(a[n >> 1], a[n >> 1], powTwoInv[domainPow]);
-    if (increment) {
-        for (u_int32_t i=0; i<nThreads-1; i++) {
-            if (threads[i].joinable()) threads[i].join();
-        }
-    }
 }
+
+
 
 template <typename Field>
 void FFT<Field>::printVector(Element *a, u_int64_t n ) {

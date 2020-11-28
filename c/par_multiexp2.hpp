@@ -10,7 +10,7 @@ class ParallelMultiexp {
 
     struct PaddedPoint {
         typename Curve::Point p;
-        uint8_t padding[32];
+//        uint8_t padding[32];
     };
 
     typename Curve::PointAffine *bases;
