@@ -326,12 +326,12 @@ rawShr_nz:
         mov rax, [rsi + r8*8 + <%= i*8 %> ]
         shr rax, cl
         and rax, r9
-        mov r12, [rsi + r8*8 + <%= (i+1)*8 %> ]
+        mov r11, [rsi + r8*8 + <%= (i+1)*8 %> ]
         rol cx, 8
-        shl r12, cl
+        shl r11, cl
         rol cx, 8
-        and r12, r10
-        or rax, r12
+        and r11, r10
+        or rax, r11
         mov [rdi + <%= i*8 %>], rax
 
         jmp rawShr_endif_<%=i%>
@@ -412,12 +412,12 @@ rawShl:
         mov rax, [rdx + <%= i*8 %> ]
         shl rax, cl
         and rax, r9
-        mov r12, [rdx + <%= (i-1)*8 %> ]
+        mov r11, [rdx + <%= (i-1)*8 %> ]
         rol cx, 8
-        shr r12, cl
+        shr r11, cl
         rol cx, 8
-        and r12, r10
-        or rax, r12
+        and r11, r10
+        or rax, r11
 <%     if (i == n64-1) { %>
         and rax, [lboMask]
 <%     } %>
