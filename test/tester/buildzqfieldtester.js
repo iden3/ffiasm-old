@@ -14,7 +14,7 @@ module.exports = testField;
 async function  testField(prime, test) {
     tmp.setGracefulCleanup();
 
-    const dir = await tmp.dir({prefix: "circom_", unsafeCleanup: true });
+    const dir = await tmp.dir({prefix: "ffiasm_", unsafeCleanup: true });
 
     const source = await buildZqField(prime, "Fr");
 

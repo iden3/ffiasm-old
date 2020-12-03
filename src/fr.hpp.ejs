@@ -32,6 +32,8 @@ extern "C" void <%=name%>_band(P<%=name%>Element r, P<%=name%>Element a, P<%=nam
 extern "C" void <%=name%>_bor(P<%=name%>Element r, P<%=name%>Element a, P<%=name%>Element b);
 extern "C" void <%=name%>_bxor(P<%=name%>Element r, P<%=name%>Element a, P<%=name%>Element b);
 extern "C" void <%=name%>_bnot(P<%=name%>Element r, P<%=name%>Element a);
+extern "C" void <%=name%>_shl(P<%=name%>Element r, P<%=name%>Element a, P<%=name%>Element b);
+extern "C" void <%=name%>_shr(P<%=name%>Element r, P<%=name%>Element a, P<%=name%>Element b);
 extern "C" void <%=name%>_eq(P<%=name%>Element r, P<%=name%>Element a, P<%=name%>Element b);
 extern "C" void <%=name%>_neq(P<%=name%>Element r, P<%=name%>Element a, P<%=name%>Element b);
 extern "C" void <%=name%>_lt(P<%=name%>Element r, P<%=name%>Element a, P<%=name%>Element b);
@@ -72,8 +74,6 @@ void <%=name%>_idiv(P<%=name%>Element r, P<%=name%>Element a, P<%=name%>Element 
 void <%=name%>_mod(P<%=name%>Element r, P<%=name%>Element a, P<%=name%>Element b);
 void <%=name%>_inv(P<%=name%>Element r, P<%=name%>Element a);
 void <%=name%>_div(P<%=name%>Element r, P<%=name%>Element a, P<%=name%>Element b);
-void <%=name%>_shl(P<%=name%>Element r, P<%=name%>Element a, P<%=name%>Element b);
-void <%=name%>_shr(P<%=name%>Element r, P<%=name%>Element a, P<%=name%>Element b);
 void <%=name%>_pow(P<%=name%>Element r, P<%=name%>Element a, P<%=name%>Element b);
 
 class Raw<%=name%> {

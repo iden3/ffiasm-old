@@ -124,69 +124,6 @@ void <%=name%>_mod(P<%=name%>Element r, P<%=name%>Element a, P<%=name%>Element b
     mpz_clear(mr);
 }
 
-void <%=name%>_shl(P<%=name%>Element r, P<%=name%>Element a, P<%=name%>Element b) {
-    mpz_t ma;
-    mpz_t mb;
-    mpz_t mr;
-    mpz_init(ma);
-    mpz_init(mb);
-    mpz_init(mr);
-
-    <%=name%>_toMpz(ma, a);
-    <%=name%>_toMpz(mb, b);
-    if (mpz_cmp_ui(mb, nBits) < 0) {
-        mpz_mul_2exp(mr, ma, mpz_get_ui(mb));
-        mpz_and(mr, mr, mask);
-        if (mpz_cmp(mr, q) >= 0) {
-            mpz_sub(mr, mr, q);
-        }
-    } else {
-        mpz_sub(mb, q, mb);
-        if (mpz_cmp_ui(mb, nBits) < 0) {
-            mpz_tdiv_q_2exp(mr, ma, mpz_get_ui(mb));
-        } else {
-            mpz_set(mr, zero);
-        }
-    }
-    <%=name%>_fromMpz(r, mr);
-
-    mpz_clear(ma);
-    mpz_clear(mb);
-    mpz_clear(mr);
-}
-
-void <%=name%>_shr(P<%=name%>Element r, P<%=name%>Element a, P<%=name%>Element b) {
-    mpz_t ma;
-    mpz_t mb;
-    mpz_t mr;
-    mpz_init(ma);
-    mpz_init(mb);
-    mpz_init(mr);
-
-    <%=name%>_toMpz(ma, a);
-    <%=name%>_toMpz(mb, b);
-    if (mpz_cmp_ui(mb, nBits) < 0) {
-        mpz_tdiv_q_2exp(mr, ma, mpz_get_ui(mb));
-    } else {
-        mpz_sub(mb, q, mb);
-        if (mpz_cmp_ui(mb, nBits) < 0) {
-            mpz_mul_2exp(mr, ma, mpz_get_ui(mb));
-            mpz_and(mr, mr, mask);
-            if (mpz_cmp(mr, q) >= 0) {
-                mpz_sub(mr, mr, q);
-            }
-        } else {
-            mpz_set(mr, zero);
-        }
-    }
-    <%=name%>_fromMpz(r, mr);
-    mpz_clear(ma);
-    mpz_clear(mb);
-    mpz_clear(mr);
-
-}
-
-
 void <%=name%>_pow(P<%=name%>Element r, P<%=name%>Element a, P<%=name%>Element b) {
     mpz_t ma;
     mpz_t mb;

@@ -18,6 +18,25 @@
 <%=done%>:
 <% } %>
 
+<% function binOpSubQIfBiggerRaw() { %>
+        <% const subQ = global.tmpLabel() %>
+        <% const done = global.tmpLabel() %>
+
+        ; Compare with q
+<%    for (let i=0; i<n64; i++) { %>
+        mov rax, [rdi + <%= (n64-i-1)*8 %>]
+        cmp rax, [q + <%= (n64-i-1)*8 %>]
+        jc <%=done%>        ; q is bigget so done.
+        jnz <%=subQ%>         ; q is lower
+<%    } %>
+        ; If equal substract q
+<%=subQ%>:
+<%    for (let i=0; i<n64; i++) { %>
+        mov rax, [q + <%=i*8%>]
+        <%= i==0 ? "sub" : "sbb" %> [rdi + <%=i*8 %>], rax
+<%    } %>
+<%=done%>:
+<% } %>
 
 <% function binOpS1S2(op) { %>
         cmp    eax, 0
@@ -262,4 +281,376 @@ bnot_l1n:
         pop rbp
         ret
 
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;
+; rawShr
+;;;;;;;;;;;;;;;;;;;;;;
+; Adds two elements of any kind
+; Params:
+;   rsi <= Pointer to element 1
+;   rdx <= how much is shifted
+;   rdi <= Pointer to result
+; Modified Registers:
+;    r8, r9, 10, r11, rax, rcx
+;;;;;;;;;;;;;;;;;;;;;;
+rawShr:
+        cmp rdx, 0
+        je <%=name%>_rawCopy
+
+        cmp rdx, <%= q.bitLength() %>
+        jae <%=name%>_rawZero
+
+rawShr_nz:
+        mov r8, rdx
+        shr r8,6
+        mov rcx, rdx
+        and rcx, 0x3F
+        jz rawShr_aligned
+        mov ch, 64
+        sub ch, cl
+
+        mov r9, 1
+        rol cx, 8
+        shl r9, cl
+        rol cx, 8
+        sub r9, 1
+        mov r10, r9
+        not r10
+
+<%   for (let i=0; i<n64; i++) { %>
+        cmp r8, <%= n64 - 1- i %>
+        jae rawShr_if2_<%=i%>
+
+        mov rax, [rsi + r8*8 + <%= i*8 %> ]
+        shr rax, cl
+        and rax, r9
+        mov r12, [rsi + r8*8 + <%= (i+1)*8 %> ]
+        rol cx, 8
+        shl r12, cl
+        rol cx, 8
+        and r12, r10
+        or rax, r12
+        mov [rdi + <%= i*8 %>], rax
+
+        jmp rawShr_endif_<%=i%>
+rawShr_if2_<%=i%>:
+        jne rawShr_else_<%=i%>
+
+        mov rax, [rsi + r8*8 + <%= i*8 %> ]
+        shr rax, cl
+        and rax, r9
+        mov [rdi + <%= i*8 %>], rax
+
+        jmp rawShr_endif_<%=i%>
+rawShr_else_<%=i%>:
+        xor  rax, rax
+        mov [rdi + <%= i*8 %>], rax
+rawShr_endif_<%=i%>:
+<%   } %>
+
+        ret
+
+rawShr_aligned:
+<%   for (let i=0; i<n64; i++) { %>
+        cmp r8, <%= n64 - 1- i %>
+        ja rawShr_if3_<%=i%>
+        mov rax, [rsi + r8*8 + <%= i*8 %> ]
+        mov [rdi + <%= i*8 %>], rax
+        jmp rawShr_endif3_<%=i%>
+rawShr_if3_<%=i%>:
+        xor rax, rax
+        mov [rdi + <%= i*8 %>], rax
+rawShr_endif3_<%=i%>:
+<%    } %>
+        ret
+
+
+;;;;;;;;;;;;;;;;;;;;;;
+; rawShl
+;;;;;;;;;;;;;;;;;;;;;;
+; Adds two elements of any kind
+; Params:
+;   rsi <= Pointer to element 1
+;   rdx <= how much is shifted
+;   rdi <= Pointer to result
+; Modified Registers:
+;    r8, r9, 10, r11, rax, rcx
+;;;;;;;;;;;;;;;;;;;;;;
+rawShl:
+        cmp rdx, 0
+        je <%=name%>_rawCopy
+        
+        cmp rdx, <%= q.bitLength() %>
+        jae <%=name%>_rawZero
+
+        mov r8, rdx
+        shr r8,6
+        mov rcx, rdx
+        and rcx, 0x3F
+        jz rawShl_aligned
+        mov ch, 64
+        sub ch, cl
+
+
+        mov r10, 1
+        shl r10, cl
+        sub r10, 1
+        mov r9, r10
+        not r9
+
+        mov rdx, rsi
+        mov rax, r8
+        shl rax, 3
+        sub rdx, rax
+
+<%   for (let i=n64-1; i>=0; i--) { %>
+        cmp r8, <%= i %>
+        jae rawShl_if2_<%=i%>
+
+        mov rax, [rdx + <%= i*8 %> ]
+        shl rax, cl
+        and rax, r9
+        mov r12, [rdx + <%= (i-1)*8 %> ]
+        rol cx, 8
+        shr r12, cl
+        rol cx, 8
+        and r12, r10
+        or rax, r12
+<%     if (i == n64-1) { %>
+        and rax, [lboMask]
+<%     } %>
+        
+        mov [rdi + <%= i*8 %>], rax
+
+        jmp rawShl_endif_<%=i%>
+rawShl_if2_<%=i%>:
+        jne rawShl_else_<%=i%>
+
+        mov rax, [rdx + <%= i*8 %> ]
+        shl rax, cl
+        and rax, r9
+<%     if (i == n64-1) { %>
+        and rax, [lboMask]
+<%     } %>
+        
+        mov [rdi + <%= i*8 %>], rax
+
+        jmp rawShl_endif_<%=i%>
+rawShl_else_<%=i%>:
+        xor rax, rax
+        mov [rdi + <%= i*8 %>], rax
+rawShl_endif_<%=i%>:
+<%   } %>
+
+<%   binOpSubQIfBiggerRaw() %>
+        ret;
+
+rawShl_aligned:
+        mov rdx, rsi
+        mov rax, r8
+        shl rax, 3
+        sub rdx, rax
+
+<%   for (let i=n64-1; i>=0; i--) { %>
+        cmp r8, <%= i %>
+        ja rawShl_if3_<%=i%>
+        mov rax, [rdx + <%= i*8 %> ]
+<%     if (i == n64-1) { %>
+        and rax, [lboMask]
+<%     } %>        
+        mov [rdi + <%= i*8 %>], rax
+        jmp rawShl_endif3_<%=i%>
+rawShl_if3_<%=i%>:
+        xor rax, rax 
+        mov [rdi + <%= i*8 %>], rax
+rawShl_endif3_<%=i%>:
+<%   } %>
+<%   binOpSubQIfBiggerRaw() %>
+        ret
+        
+
+
+<% function parseShiftValue(lbPositive, lbNegative, lbBig) { %>
+        <% const lbS2 = global.tmpLabel() %>
+        <% const lbL2 = global.tmpLabel() %>
+        <% const lbL2neg = global.tmpLabel() %>
+        <% const lbS2neg = global.tmpLabel() %>
+        mov    rcx, [rdx]
+        bt     rcx, 63          ; Check if is short second operand
+        jnc     <%= lbS2 %>
+
+        ; long 2
+        bt     rcx, 62          ; Check if is montgomery second operand
+        jnc     <%= lbL2 %>
+<%=     global.fromMont_b() %>
+<%= lbL2 %>:
+        mov rcx, [rdx + 8]
+        cmp rcx, <%= q.bitLength() %>
+        jae  <%= lbL2neg %>
+        xor rax, rax
+        <% for (let i=1; i<n64; i++) { %>
+        cmp [rdx + <%= (i+1)*8 %>], rax
+        jnz <%= lbL2neg %>
+        <% } %>
+        mov rdx, rcx
+        jmp <%= lbPositive %>
+
+<%= lbL2neg %>:
+        mov rcx, [q]
+        sub rcx, [rdx+8]
+        cmp rcx, <%= q.bitLength() %>
+        jae  <%= lbBig %>
+        mov rax, [q]
+        sub rax, [rdx+8]
+        <% for (let i=1; i<n64; i++) { %>
+        mov rax, [q+ <%= (i)*8 %>] 
+        sbb rax, [rdx + <%= (i+1)*8 %>]
+        jnz <%= lbBig %>
+        <% } %>
+        mov rdx, rcx
+        jmp <%= lbNegative %>
+
+<%= lbS2 %>:
+        cmp ecx, 0
+        jl  <%= lbS2neg %>
+        cmp ecx, <%= q.bitLength() %>
+        jae  <%= lbBig %>
+        movsx rdx, ecx 
+        jmp <%= lbPositive %>
+<%= lbS2neg %>:
+        neg ecx
+        cmp ecx, <%= q.bitLength() %>
+        jae  <%= lbBig %>
+        movsx rdx, ecx 
+        jmp <%= lbNegative %>
+
+<% } %>
+
+
+;;;;;;;;;;;;;;;;;;;;;;
+; shr
+;;;;;;;;;;;;;;;;;;;;;;
+; Adds two elements of any kind
+; Params:
+;   rsi <= Pointer to element 1
+;   rdx <= Pointer to element 2
+;   rdi <= Pointer to result
+; Modified Registers:
+;    r8, r9, 10, r11, rax, rcx
+;;;;;;;;;;;;;;;;;;;;;;
+<%=name%>_shr:
+        push   rbp
+        mov    rbp, rsp
+
+<%=    parseShiftValue("do_shr", "do_shl", "setzero") %>
+        
+
+;;;;;;;;;;;;;;;;;;;;;;
+; shl
+;;;;;;;;;;;;;;;;;;;;;;
+; Adds two elements of any kind
+; Params:
+;   rsi <= Pointer to element 1
+;   rdx <= Pointer to element 2
+;   rdi <= Pointer to result
+; Modified Registers:
+;    r8, r9, 10, r11, rax, rcx
+;;;;;;;;;;;;;;;;;;;;;;
+<%=name%>_shl:
+        push   rbp
+        mov    rbp, rsp
+<%=    parseShiftValue("do_shl", "do_shr", "setzero") %>
+
+;;;;;;;;;;
+;;; doShl
+;;;;;;;;;;
+do_shl: 
+        mov    rcx, [rsi]
+        bt     rcx, 63          ; Check if is short second operand
+        jc     do_shll
+do_shls:
+
+        movsx rax, ecx
+        cmp rax, 0
+        jz  setzero;
+        jl  do_shlcl
+
+        cmp rdx, 31
+        jae do_shlcl
+
+        mov cl, dl 
+        shl rax, cl
+        mov rcx, rax
+        shr rcx, 31
+        jnz do_shlcl
+        mov [rdi], rax
+        mov rsp, rbp
+        pop rbp
+        ret
+
+do_shlcl:
+<%=     global.toLong_a(); %>
+        jmp do_shlln
+
+do_shll:
+        bt      rcx, 62          ; Check if is short second operand
+        jnc     do_shlln
+<%=     global.fromMont_a(); %>
+do_shlln:
+<%=     global.setTypeDest("0x80"); %>
+        add     di, 8
+        add     si, 8
+        call    rawShl
+        mov rsp, rbp
+        pop rbp
+        ret
+
+
+;;;;;;;;;;
+;;; doShr
+;;;;;;;;;;
+do_shr: 
+        mov    rcx, [rsi]
+        bt     rcx, 63          ; Check if is short second operand
+        jc     do_shrl
+do_shrs:
+        movsx rax, ecx
+        cmp rax, 0
+        jz  setzero;
+        jl  do_shrcl
+
+        cmp rdx, 31
+        jae setzero
+
+        mov cl, dl 
+        shr rax, cl
+        mov [rdi], rax
+        mov rsp, rbp
+        pop rbp
+        ret
+
+do_shrcl:
+<%=     global.toLong_a(); %>
+
+do_shrl:
+        bt      rcx, 62          ; Check if is short second operand
+        jnc     do_shrln
+<%=     global.fromMont_a(); %>
+do_shrln:
+<%=     global.setTypeDest("0x80"); %>
+        add     di, 8
+        add     si, 8
+        call    rawShr
+        mov rsp, rbp
+        pop rbp
+        ret
+
+setzero:
+        xor rax, rax
+        mov [rdi], rax
+        mov rsp, rbp
+        pop rbp
+        ret
 

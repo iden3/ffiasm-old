@@ -35,6 +35,24 @@
 <% } %>
         ret
 
+
+;;;;;;;;;;;;;;;;;;;;;;
+; rawZero
+;;;;;;;;;;;;;;;;;;;;;;
+; Copies
+; Params:
+;   rsi <= the src
+;
+; Nidified registers:
+;   rax
+;;;;;;;;;;;;;;;;;;;;;;;
+<%=name%>_rawZero:
+        xor     rax, rax
+<% for (let i=0; i<n64; i++) { %>
+        mov     [rdi + <%= i*8 %>], rax
+<% } %>
+        ret
+
 ;;;;;;;;;;;;;;;;;;;;;;
 ; rawSwap
 ;;;;;;;;;;;;;;;;;;;;;;
