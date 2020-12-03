@@ -542,6 +542,9 @@ rawShl_endif3_<%=i%>:
 ;;;;;;;;;;;;;;;;;;;;;;
 <%=name%>_shr:
         push   rbp
+        push   rsi
+        push   rdi
+        push   rdx
         mov    rbp, rsp
 
 <%=    parseShiftValue("do_shr", "do_shl", "setzero") %>
@@ -560,6 +563,9 @@ rawShl_endif3_<%=i%>:
 ;;;;;;;;;;;;;;;;;;;;;;
 <%=name%>_shl:
         push   rbp
+        push   rsi
+        push   rdi
+        push   rdx
         mov    rbp, rsp
 <%=    parseShiftValue("do_shl", "do_shr", "setzero") %>
 
@@ -587,7 +593,10 @@ do_shls:
         jnz do_shlcl
         mov [rdi], rax
         mov rsp, rbp
-        pop rbp
+        pop   rdx
+        pop   rdi
+        pop   rsi
+        pop   rbp
         ret
 
 do_shlcl:
@@ -604,7 +613,10 @@ do_shlln:
         add     si, 8
         call    rawShl
         mov rsp, rbp
-        pop rbp
+        pop   rdx
+        pop   rdi
+        pop   rsi
+        pop   rbp
         ret
 
 
@@ -628,7 +640,10 @@ do_shrs:
         shr rax, cl
         mov [rdi], rax
         mov rsp, rbp
-        pop rbp
+        pop   rdx
+        pop   rdi
+        pop   rsi
+        pop   rbp
         ret
 
 do_shrcl:
@@ -644,13 +659,19 @@ do_shrln:
         add     si, 8
         call    rawShr
         mov rsp, rbp
-        pop rbp
+        pop   rdx
+        pop   rdi
+        pop   rsi
+        pop   rbp
         ret
 
 setzero:
         xor rax, rax
         mov [rdi], rax
         mov rsp, rbp
-        pop rbp
+        pop   rdx
+        pop   rdi
+        pop   rsi
+        pop   rbp
         ret
 
