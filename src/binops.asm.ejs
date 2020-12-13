@@ -609,8 +609,8 @@ do_shll:
 <%=     global.fromMont_a(); %>
 do_shlln:
 <%=     global.setTypeDest("0x80"); %>
-        add     di, 8
-        add     si, 8
+        add     rdi, 8
+        add     rsi, 8
         call    rawShl
         mov rsp, rbp
         pop   rdx
@@ -655,8 +655,8 @@ do_shrl:
 <%=     global.fromMont_a(); %>
 do_shrln:
 <%=     global.setTypeDest("0x80"); %>
-        add     di, 8
-        add     si, 8
+        add     rdi, 8
+        add     rsi, 8
         call    rawShr
         mov rsp, rbp
         pop   rdx
