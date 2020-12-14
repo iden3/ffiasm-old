@@ -1,10 +1,11 @@
+#ifndef COUNT_OPS
 #define COUNT_OPS
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include "alt_bn128.hpp"
 #include <time.h>
-
 
 using namespace AltBn128;
 

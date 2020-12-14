@@ -1,4 +1,6 @@
+#ifndef COUNT_OPS
 #define COUNT_OPS
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
