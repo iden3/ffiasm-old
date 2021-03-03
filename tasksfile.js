@@ -41,7 +41,7 @@ function testSplitParStr() {
         " ../c/splitparstr.cpp"+
         " ../c/splitparstr_test.cpp"+
         " googletest-release-1.10.0/libgtest.a"+
-        " -o splitparsestr_test", {cwd: "build", nopipe: true}
+        " -pthread -std=c++11 -o splitparsestr_test", {cwd: "build", nopipe: true}
     );
     sh("./splitparsestr_test", {cwd: "build", nopipe: true});
 }
@@ -52,7 +52,6 @@ function testAltBn128() {
         " -I."+
         " -I../c"+
         " ../c/naf.cpp"+
-        " ../c/multiexp2.cpp"+
         " ../c/splitparstr.cpp"+
         " ../c/alt_bn128.cpp"+
         " ../c/alt_bn128_test.cpp"+
@@ -69,36 +68,15 @@ function testAltBn128() {
 }
 
 
-function testParallelAcc() {
-    sh("g++" +
-        " -Igoogletest-release-1.10.0/googletest/include"+
-        " -I."+
-        " -I../src"+
-        " ../c/alt_bn128.cpp"+
-        " ../c/naf.cpp"+
-        " ../c/multiexp2.cpp"+
-        " ../c/splitparstr.cpp"+
-        " ../c/parallelacc_test.cpp"+
-        " fq.cpp"+
-        " fq.o"+
-        " fr.cpp"+
-        " fr.o"+
-        " googletest-release-1.10.0/libgtest.a"+
-        " -o parallelacc_test -pthread -std=c++11 -lgmp  -O3", {cwd: "build", nopipe: true}
-    );
-    sh("./parallelacc_test", {cwd: "build", nopipe: true});
-}
-
-
 function benchMultiExpG1() {
     sh("g++ -O3 -g" +
         " -Igoogletest-release-1.10.0/googletest/include"+
         " -I."+
         " -I../c"+
         " ../c/naf.cpp"+
-        " ../c/multiexp2.cpp"+
         " ../c/splitparstr.cpp"+
         " ../c/alt_bn128.cpp"+
+        " ../c/misc.cpp"+
         " ../benchmark/multiexp_g1.cpp"+
         " fq.cpp"+
         " fq.o"+
@@ -106,7 +84,7 @@ function benchMultiExpG1() {
         " fr.o"+
         // " googletest-release-1.10.0/libgtest.a"+
         " -o multiexp_g1_benchmark" +
-        " -lgmp -lprofiler -DCOUNT_OPS", {cwd: "build", nopipe: true}
+        " -lgmp -pthread -std=c++11 -fopenmp -DCOUNT_OPS" , {cwd: "build", nopipe: true}
     );
     sh("./multiexp_g1_benchmark 1000000", {cwd: "build", nopipe: true});
 }
@@ -117,43 +95,19 @@ function benchMultiExpG2() {
         " -I."+
         " -I../c"+
         " ../c/naf.cpp"+
-        " ../c/multiexp2.cpp"+
         " ../c/splitparstr.cpp"+
         " ../c/alt_bn128.cpp"+
+        " ../c/misc.cpp"+
         " ../benchmark/multiexp_g2.cpp"+
         " fq.cpp"+
         " fq.o"+
         " fr.cpp"+
         " fr.o"+
-        " googletest-release-1.10.0/libgtest.a"+
+        // " googletest-release-1.10.0/libgtest.a"+
         " -o multiexp_g2_benchmark" +
-        " -fmax-errors=5 -O3 -Wall -lgmp -DCOUNT_OPS", {cwd: "build", nopipe: true}
+        " -lgmp -pthread -std=c++11 -fopenmp -DCOUNT_OPS" , {cwd: "build", nopipe: true}
     );
     sh("./multiexp_g2_benchmark 1000000", {cwd: "build", nopipe: true});
-}
-
-function prover() {
-    sh("g++" +
-        " -Igoogletest-release-1.10.0/googletest/include"+
-        " -I."+
-        " -I../c"+
-        " ../c/misc.cpp"+
-        " ../c/naf.cpp"+
-        " ../c/multiexp2.cpp"+
-        " ../c/splitparstr.cpp"+
-        " ../c/alt_bn128.cpp"+
-        " ../c/prover_main.cpp"+
-        " ../c/binfile_utils.cpp"+
-        " ../c/zkey_utils.cpp"+
-        " ../c/wtns_utils.cpp"+
-        " fq.cpp"+
-        " fq.o"+
-        " fr.cpp"+
-        " fr.o"+
-        " -o prover" +
-        " -fmax-errors=5 -std=c++17 -pthread -lgmp -O3 -fopenmp", {cwd: "build", nopipe: true}
-    );
-//    sh("./multiexp_g2_benchmark 1000000", {cwd: "build", nopipe: true});
 }
 
 cli({
@@ -163,8 +117,6 @@ cli({
     createFieldSources,
     testSplitParStr,
     testAltBn128,
-    testParallelAcc,
     benchMultiExpG1,
     benchMultiExpG2,
-    prover
 });

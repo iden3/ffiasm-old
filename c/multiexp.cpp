@@ -120,15 +120,15 @@ void ParallelMultiexp<Curve>::multiexp(typename Curve::Point &r, typename Curve:
 
     typename Curve::Point *chunkResults = new typename Curve::Point[nChunks];
     accs = new PaddedPoint[nThreads*accsPerChunk];
-    std::cout << "InitTrees " << "\n"; 
+    // std::cout << "InitTrees " << "\n"; 
     initAccs();
 
     for (uint32_t i=0; i<nChunks; i++) {
-        std::cout << "process chunks " << i << "\n"; 
+        // std::cout << "process chunks " << i << "\n"; 
         processChunk(i);
-        std::cout << "pack " << i << "\n"; 
+        // std::cout << "pack " << i << "\n"; 
         packThreads();
-        std::cout << "reduce " << i << "\n"; 
+        // std::cout << "reduce " << i << "\n"; 
         reduce(chunkResults[i], bitsPerChunk);
     }
 
