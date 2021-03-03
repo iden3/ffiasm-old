@@ -15,15 +15,15 @@ static bool initialized = false;
 
 
 void <%=name%>_toMpz(mpz_t r, P<%=name%>Element pE) {
-    <%=name%>_toNormal(pE, pE);
-    if (!(pE->type & <%=name%>_LONG)) {
-        mpz_set_si(r, pE->shortVal);
-        if (pE->shortVal<0) {
+    <%=name%>Element tmp;
+    <%=name%>_toNormal(&tmp, pE);
+    if (!(tmp.type & <%=name%>_LONG)) {
+        mpz_set_si(r, tmp.shortVal);
+        if (tmp.shortVal<0) {
             mpz_add(r, r, q);
         }
     } else {
-        <%=name%>_toNormal(pE, pE);
-        mpz_import(r, <%=name%>_N64, -1, 8, -1, 0, (const void *)pE->longVal);
+        mpz_import(r, <%=name%>_N64, -1, 8, -1, 0, (const void *)tmp.longVal);
     }
 }
 
@@ -62,6 +62,7 @@ void <%=name%>_str2element(P<%=name%>Element pE, char const *s) {
 }
 
 char *<%=name%>_element2str(P<%=name%>Element pE) {
+    <%=name%>Element tmp;
     mpz_t r;
     if (!(pE->type & <%=name%>_LONG)) {
         if (pE->shortVal>=0) {
@@ -73,9 +74,9 @@ char *<%=name%>_element2str(P<%=name%>Element pE) {
             mpz_add(r, r, q);
         }
     } else {
-        <%=name%>_toNormal(pE, pE);
+        <%=name%>_toNormal(&tmp, pE);
         mpz_init(r);
-        mpz_import(r, <%=name%>_N64, -1, 8, -1, 0, (const void *)pE->longVal);
+        mpz_import(r, <%=name%>_N64, -1, 8, -1, 0, (const void *)tmp.longVal);
     }
     char *res = mpz_get_str (0, 10, r);
     mpz_clear(r);
