@@ -117,7 +117,7 @@ public:
 
     void multiMulByScalar(Point &r, PointAffine *bases, uint8_t* scalars, unsigned int scalarSize, unsigned int n, unsigned int nThreads=0) {
         ParallelMultiexp<Curve<BaseField>> pm(*this);
-        pm.multiexp(r, bases, scalars, scalarSize, n);
+        pm.multiexp(r, bases, scalars, scalarSize, n, nThreads);
     }
 
 #ifdef COUNT_OPS

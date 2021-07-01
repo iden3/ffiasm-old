@@ -98,11 +98,12 @@ void ParallelMultiexp<Curve>::reduce(typename Curve::Point &res, uint32_t nBits)
 template <typename Curve>
 void ParallelMultiexp<Curve>::multiexp(typename Curve::Point &r, typename Curve::PointAffine *_bases, uint8_t* _scalars, uint32_t _scalarSize, uint32_t _n, uint32_t _nThreads) {
     nThreads = _nThreads==0 ? omp_get_max_threads() : _nThreads;
-//    nThreads = 1;
     bases = _bases;
     scalars = _scalars;
     scalarSize = _scalarSize;
     n = _n;
+
+    ThreadLimit threadLimit (nThreads);
 
     if (n==0) {
         g.copy(r, g.zero());
