@@ -179,7 +179,7 @@ Raw<%=name%>::~Raw<%=name%>() {
 
 void Raw<%=name%>::fromString(Element &r, const std::string &s, uint32_t radix) {
     mpz_t mr;
-    mpz_init_set_str(mr, s.c_str(), 10);
+    mpz_init_set_str(mr, s.c_str(), radix);
     mpz_fdiv_r(mr, mr, q);
     for (int i=0; i<<%=name%>_N64; i++) r.v[i] = 0;
     mpz_export((void *)(r.v), NULL, -1, 8, -1, 0, mr);
