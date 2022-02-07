@@ -50,18 +50,18 @@ extern "C" void <%=name%>_toMontgomery(P<%=name%>Element r, P<%=name%>Element a)
 extern "C" int <%=name%>_isTrue(P<%=name%>Element pE);
 extern "C" int <%=name%>_toInt(P<%=name%>Element pE);
 
-extern "C" void <%=name%>_rawCopy(<%=name%>RawElement pRawResult, <%=name%>RawElement pRawA);
+extern "C" void <%=name%>_rawCopy(<%=name%>RawElement pRawResult, const <%=name%>RawElement pRawA);
 extern "C" void <%=name%>_rawSwap(<%=name%>RawElement pRawResult, <%=name%>RawElement pRawA);
-extern "C" void <%=name%>_rawAdd(<%=name%>RawElement pRawResult, <%=name%>RawElement pRawA, <%=name%>RawElement pRawB);
-extern "C" void <%=name%>_rawSub(<%=name%>RawElement pRawResult, <%=name%>RawElement pRawA, <%=name%>RawElement pRawB);
-extern "C" void <%=name%>_rawNeg(<%=name%>RawElement pRawResult, <%=name%>RawElement pRawA);
-extern "C" void <%=name%>_rawMMul(<%=name%>RawElement pRawResult, <%=name%>RawElement pRawA, <%=name%>RawElement pRawB);
-extern "C" void <%=name%>_rawMSquare(<%=name%>RawElement pRawResult, <%=name%>RawElement pRawA);
-extern "C" void <%=name%>_rawMMul1(<%=name%>RawElement pRawResult, <%=name%>RawElement pRawA, uint64_t pRawB);
-extern "C" void <%=name%>_rawToMontgomery(<%=name%>RawElement pRawResult, <%=name%>RawElement pRawA);
-extern "C" void <%=name%>_rawFromMontgomery(<%=name%>RawElement pRawResult, <%=name%>RawElement pRawA);
-extern "C" int <%=name%>_rawIsEq(<%=name%>RawElement pRawA, <%=name%>RawElement pRawB);
-extern "C" int <%=name%>_rawIsZero(<%=name%>RawElement pRawB);
+extern "C" void <%=name%>_rawAdd(<%=name%>RawElement pRawResult, const <%=name%>RawElement pRawA, const <%=name%>RawElement pRawB);
+extern "C" void <%=name%>_rawSub(<%=name%>RawElement pRawResult, const <%=name%>RawElement pRawA, const <%=name%>RawElement pRawB);
+extern "C" void <%=name%>_rawNeg(<%=name%>RawElement pRawResult, const <%=name%>RawElement pRawA);
+extern "C" void <%=name%>_rawMMul(<%=name%>RawElement pRawResult, const <%=name%>RawElement pRawA, const <%=name%>RawElement pRawB);
+extern "C" void <%=name%>_rawMSquare(<%=name%>RawElement pRawResult, const <%=name%>RawElement pRawA);
+extern "C" void <%=name%>_rawMMul1(<%=name%>RawElement pRawResult, const <%=name%>RawElement pRawA, uint64_t pRawB);
+extern "C" void <%=name%>_rawToMontgomery(<%=name%>RawElement pRawResult, const <%=name%>RawElement &pRawA);
+extern "C" void <%=name%>_rawFromMontgomery(<%=name%>RawElement pRawResult, const <%=name%>RawElement &pRawA);
+extern "C" int <%=name%>_rawIsEq(const <%=name%>RawElement pRawA, const <%=name%>RawElement pRawB);
+extern "C" int <%=name%>_rawIsZero(const <%=name%>RawElement pRawB);
 
 extern "C" void <%=name%>_fail();
 
@@ -101,28 +101,28 @@ public:
     Element &one() { return fOne; };
     Element &negOne() { return fNegOne; };
 
-    void fromString(Element &r, std::string n);
-    std::string toString(Element &a, uint32_t radix = 10);
+    void fromString(Element &r, const std::string &n, uint32_t radix = 10);
+    std::string toString(const Element &a, uint32_t radix = 10);
 
-    void inline copy(Element &r, Element &a) { <%=name%>_rawCopy(r.v, a.v); };
+    void inline copy(Element &r, const Element &a) { <%=name%>_rawCopy(r.v, a.v); };
     void inline swap(Element &a, Element &b) { <%=name%>_rawSwap(a.v, b.v); };
-    void inline add(Element &r, Element &a, Element &b) { <%=name%>_rawAdd(r.v, a.v, b.v); };
-    void inline sub(Element &r, Element &a, Element &b) { <%=name%>_rawSub(r.v, a.v, b.v); };
-    void inline mul(Element &r, Element &a, Element &b) { <%=name%>_rawMMul(r.v, a.v, b.v); };
-    void inline mul1(Element &r, Element &a, uint64_t b) { <%=name%>_rawMMul1(r.v, a.v, b); };
-    void inline neg(Element &r, Element &a) { <%=name%>_rawNeg(r.v, a.v); };
-    void inline square(Element &r, Element &a) { <%=name%>_rawMSquare(r.v, a.v); };
-    void inv(Element &r, Element &a);
-    void div(Element &r, Element &a, Element &b);
-    void exp(Element &r, Element &base, uint8_t* scalar, unsigned int scalarSize);
+    void inline add(Element &r, const Element &a, const Element &b) { <%=name%>_rawAdd(r.v, a.v, b.v); };
+    void inline sub(Element &r, const Element &a, const Element &b) { <%=name%>_rawSub(r.v, a.v, b.v); };
+    void inline mul(Element &r, const Element &a, const Element &b) { <%=name%>_rawMMul(r.v, a.v, b.v); };
+    void inline mul1(Element &r, const Element &a, uint64_t b) { <%=name%>_rawMMul1(r.v, a.v, b); };
+    void inline neg(Element &r, const Element &a) { <%=name%>_rawNeg(r.v, a.v); };
+    void inline square(Element &r, const Element &a) { <%=name%>_rawMSquare(r.v, a.v); };
+    void inv(Element &r, const Element &a);
+    void div(Element &r, const Element &a, const Element &b);
+    void exp(Element &r, const Element &base, uint8_t* scalar, unsigned int scalarSize);
 
-    void inline toMontgomery(Element &r, Element &a) { <%=name%>_rawToMontgomery(r.v, a.v); };
-    void inline fromMontgomery(Element &r, Element &a) { <%=name%>_rawFromMontgomery(r.v, a.v); };
-    int inline eq(Element &a, Element &b) { return <%=name%>_rawIsEq(a.v, b.v); };
-    int inline isZero(Element &a) { return <%=name%>_rawIsZero(a.v); };
+    void inline toMontgomery(Element &r, const Element &a) { <%=name%>_rawToMontgomery(r.v, a.v); };
+    void inline fromMontgomery(Element &r, const Element &a) { <%=name%>_rawFromMontgomery(r.v, a.v); };
+    int inline eq(const Element &a, const Element &b) { return <%=name%>_rawIsEq(a.v, b.v); };
+    int inline isZero(const Element &a) { return <%=name%>_rawIsZero(a.v); };
 
-    void toMpz(mpz_t r, Element &a);
-    void fromMpz(Element &a, mpz_t r);
+    void toMpz(mpz_t r, const Element &a);
+    void fromMpz(Element &a, const mpz_t r);
 
     void fromUI(Element &r, unsigned long int v);
 
