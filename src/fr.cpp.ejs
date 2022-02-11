@@ -177,9 +177,9 @@ Raw<%=name%>::Raw<%=name%>() {
 Raw<%=name%>::~Raw<%=name%>() {
 }
 
-void Raw<%=name%>::fromString(Element &r, std::string s) {
+void Raw<%=name%>::fromString(Element &r, const std::string &s, uint32_t radix) {
     mpz_t mr;
-    mpz_init_set_str(mr, s.c_str(), 10);
+    mpz_init_set_str(mr, s.c_str(), radix);
     mpz_fdiv_r(mr, mr, q);
     for (int i=0; i<<%=name%>_N64; i++) r.v[i] = 0;
     mpz_export((void *)(r.v), NULL, -1, 8, -1, 0, mr);
@@ -199,7 +199,7 @@ void Raw<%=name%>::fromUI(Element &r, unsigned long int v) {
 
 
 
-std::string Raw<%=name%>::toString(Element &a, uint32_t radix) {
+std::string Raw<%=name%>::toString(const Element &a, uint32_t radix) {
     Element tmp;
     mpz_t r;
     <%=name%>_rawFromMontgomery(tmp.v, a.v);
@@ -212,7 +212,7 @@ std::string Raw<%=name%>::toString(Element &a, uint32_t radix) {
     return resS;
 }
 
-void Raw<%=name%>::inv(Element &r, Element &a) {
+void Raw<%=name%>::inv(Element &r, const Element &a) {
     mpz_t mr;
     mpz_init(mr);
     mpz_import(mr, <%=name%>_N64, -1, 8, -1, 0, (const void *)(a.v));
@@ -226,14 +226,14 @@ void Raw<%=name%>::inv(Element &r, Element &a) {
     mpz_clear(mr);
 }
 
-void Raw<%=name%>::div(Element &r, Element &a, Element &b) {
+void Raw<%=name%>::div(Element &r, const Element &a, const Element &b) {
     Element tmp;
     inv(tmp, b);
     mul(r, a, tmp);
 }
 
 #define BIT_IS_SET(s, p) (s[p>>3] & (1 << (p & 0x7)))
-void Raw<%=name%>::exp(Element &r, Element &base, uint8_t* scalar, unsigned int scalarSize) {
+void Raw<%=name%>::exp(Element &r, const Element &base, uint8_t* scalar, unsigned int scalarSize) {
     bool oneFound = false;
     Element copyBase;
     copy(copyBase, base);
@@ -254,13 +254,13 @@ void Raw<%=name%>::exp(Element &r, Element &base, uint8_t* scalar, unsigned int 
     }
 }
 
-void Raw<%=name%>::toMpz(mpz_t r, Element &a) {
+void Raw<%=name%>::toMpz(mpz_t r, const Element &a) {
     Element tmp;
     <%=name%>_rawFromMontgomery(tmp.v, a.v);
     mpz_import(r, <%=name%>_N64, -1, 8, -1, 0, (const void *)tmp.v);
 }
 
-void Raw<%=name%>::fromMpz(Element &r, mpz_t a) {
+void Raw<%=name%>::fromMpz(Element &r, const mpz_t a) {
     for (int i=0; i<<%=name%>_N64; i++) r.v[i] = 0;
     mpz_export((void *)(r.v), NULL, -1, 8, -1, 0, a);
     <%=name%>_rawToMontgomery(r.v, r.v);
