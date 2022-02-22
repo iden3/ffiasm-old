@@ -2,7 +2,7 @@
 
 This package is a script that generates a Finite field Library in Intel64 Assembly
 
-## Ussage
+## Usage
 
 install g++ nasm ang gmp library if you don't have it.
 
