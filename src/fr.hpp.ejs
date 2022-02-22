@@ -97,9 +97,9 @@ public:
     Raw<%=name%>();
     ~Raw<%=name%>();
 
-    Element &zero() { return fZero; };
-    Element &one() { return fOne; };
-    Element &negOne() { return fNegOne; };
+    const Element &zero() { return fZero; };
+    const Element &one() { return fOne; };
+    const Element &negOne() { return fNegOne; };
 
     void fromString(Element &r, const std::string &n, uint32_t radix = 10);
     std::string toString(const Element &a, uint32_t radix = 10);
