@@ -111,6 +111,21 @@ public:
     void inline add(Element &r, const Element &a, const Element &b) { <%=name%>_rawAdd(r.v, a.v, b.v); };
     void inline sub(Element &r, const Element &a, const Element &b) { <%=name%>_rawSub(r.v, a.v, b.v); };
     void inline mul(Element &r, const Element &a, const Element &b) { <%=name%>_rawMMul(r.v, a.v, b.v); };
+
+    Element inline add(const Element &a, const Element &b) { Element r; <%=name%>_rawAdd(r.v, a.v, b.v); return r;};
+    Element inline sub(const Element &a, const Element &b) { Element r; <%=name%>_rawSub(r.v, a.v, b.v); return r;};
+    Element inline mul(const Element &a, const Element &b) { Element r; <%=name%>_rawMMul(r.v, a.v, b.v); return r;};
+
+    Element inline neg(const Element &a) { Element r; <%=name%>_rawNeg(r.v, a.v); return r; };
+    Element inline square(const Element &a) { Element r; <%=name%>_rawMSquare(r.v, a.v); return r; };
+
+    Element inline add(int a, const Element &b) { return add(set(a), b);};
+    Element inline sub(int a, const Element &b) { return sub(set(a), b);};
+    Element inline mul(int a, const Element &b) { return mul(set(a), b);};
+
+    Element inline add(const Element &a, int b) { return add(a, set(b));};
+    Element inline sub(const Element &a, int b) { return sub(a, set(b));};
+    Element inline mul(const Element &a, int b) { return mul(a, set(b));};
     void inline mul1(Element &r, const Element &a, uint64_t b) { <%=name%>_rawMMul1(r.v, a.v, b); };
     void inline neg(Element &r, const Element &a) { <%=name%>_rawNeg(r.v, a.v); };
     void inline square(Element &r, const Element &a) { <%=name%>_rawMSquare(r.v, a.v); };
