@@ -286,6 +286,34 @@ void Raw<%=name%>::fromMpz(Element &r, const mpz_t a) {
     <%=name%>_rawToMontgomery(r.v, r.v);
 }
 
+int Raw<%=name%>::toRprBE(const Element &element, uint8_t *data, int bytes)
+{
+    if (bytes < <%=name%>_N64 * 8) {
+      return -(<%=name%>_N64 * 8);
+    }
+
+    mpz_t r;
+    mpz_init(r);
+  
+    toMpz(r, element);
+    
+    mpz_export(data, NULL, 1, 8, 1, 0, r);
+  
+    return <%=name%>_N64 * 8;
+}
+
+int Raw<%=name%>::fromRprBE(Element &element, const uint8_t *data, int bytes)
+{
+    if (bytes < <%=name%>_N64 * 8) {
+      return -(<%=name%>_N64* 8);
+    }
+    mpz_t r;
+    mpz_init(r);
+
+    mpz_import(r, <%=name%>_N64 * 8, 0, 1, 0, 0, data);
+    fromMpz(element, r);
+    return <%=name%>_N64 * 8;
+}
 
 static bool init = <%=name%>_init();
 
