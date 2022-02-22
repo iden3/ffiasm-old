@@ -124,6 +124,8 @@ public:
     void toMpz(mpz_t r, const Element &a);
     void fromMpz(Element &a, const mpz_t r);
 
+    int bytes ( void ) { return <%=name%>_N64 * 8; };
+    
     void fromUI(Element &r, unsigned long int v);
 
     static Raw<%=name%> field;
