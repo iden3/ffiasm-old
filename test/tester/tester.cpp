@@ -10,6 +10,7 @@
 #include <stdio.h>      /* printf, NULL */
 #include <stdlib.h>
 #include <cassert>
+#include <map>
 
 
 #include "fr.hpp"
