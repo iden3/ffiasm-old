@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
         G2.add(bases[i], bases[i-1], bases[i-2]);
     }
 
-    clock_t start, end;
+    double start, end;
     double cpu_time_used;
 
     G2Point p1;
