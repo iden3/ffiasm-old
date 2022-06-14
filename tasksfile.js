@@ -86,7 +86,7 @@ function benchMultiExpG1() {
         " -o multiexp_g1_benchmark" +
         " -lgmp -pthread -std=c++11 -fopenmp" , {cwd: "build", nopipe: true}
     );
-    sh("./multiexp_g1_benchmark 1000000", {cwd: "build", nopipe: true});
+    sh("./multiexp_g1_benchmark 16777216", {cwd: "build", nopipe: true});
 }
 
 function benchMultiExpG2() {
@@ -107,7 +107,7 @@ function benchMultiExpG2() {
         " -o multiexp_g2_benchmark" +
         " -lgmp -pthread -std=c++11 -fopenmp" , {cwd: "build", nopipe: true}
     );
-    sh("./multiexp_g2_benchmark 1000000", {cwd: "build", nopipe: true});
+    sh("./multiexp_g2_benchmark 16777216", {cwd: "build", nopipe: true});
 }
 
 cli({
