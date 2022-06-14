@@ -19,7 +19,7 @@ function compileGoogleTest() {
 function createFieldSources() {
     sh("node ../src/buildzqfield.js -q 21888242871839275222246405745257275088696311157297823662689037894645226208583 -n Fq", {cwd: "build"});
     sh("node ../src/buildzqfield.js -q 21888242871839275222246405745257275088548364400416034343698204186575808495617 -n Fr", {cwd: "build"});
-    
+
     if (process.platform === "darwin") {
         sh("nasm -fmacho64 --prefix _ fq.asm", {cwd: "build"});
     }  else if (process.platform === "linux") {
@@ -84,7 +84,7 @@ function benchMultiExpG1() {
         " fr.o"+
         // " googletest-release-1.10.0/libgtest.a"+
         " -o multiexp_g1_benchmark" +
-        " -lgmp -pthread -std=c++11 -fopenmp -DCOUNT_OPS" , {cwd: "build", nopipe: true}
+        " -lgmp -pthread -std=c++11 -fopenmp" , {cwd: "build", nopipe: true}
     );
     sh("./multiexp_g1_benchmark 1000000", {cwd: "build", nopipe: true});
 }
@@ -105,7 +105,7 @@ function benchMultiExpG2() {
         " fr.o"+
         // " googletest-release-1.10.0/libgtest.a"+
         " -o multiexp_g2_benchmark" +
-        " -lgmp -pthread -std=c++11 -fopenmp -DCOUNT_OPS" , {cwd: "build", nopipe: true}
+        " -lgmp -pthread -std=c++11 -fopenmp" , {cwd: "build", nopipe: true}
     );
     sh("./multiexp_g2_benchmark 1000000", {cwd: "build", nopipe: true});
 }

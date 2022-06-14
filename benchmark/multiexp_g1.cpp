@@ -1,7 +1,3 @@
-#ifndef COUNT_OPS
-#define COUNT_OPS
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include "alt_bn128.hpp"
@@ -42,15 +38,20 @@ int main(int argc, char **argv) {
     double cpu_time_used;
 
     G1Point p1;
-    
-    printf("Starting multiexp. \n");
-    G1.resetCounters();
-    start = clock();
-    G1.multiMulByScalar(p1, bases, (uint8_t *)scalars, 32, N);
-    end = clock();
 
+    printf("Starting multiexp. \n");
+#ifdef COUNT_OPS
+    G1.resetCounters();
+#endif
+
+    start = omp_get_wtime();
+    G1.multiMulByScalar(p1, bases, (uint8_t *)scalars, 32, N);
+    end = omp_get_wtime();
+
+#ifdef COUNT_OPS
     G1.printCounters();
-    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+#endif
+    cpu_time_used = ((double) (end - start));
     printf("Time used: %.2lf\n", cpu_time_used);
     printf("Avg time per exp: %.2lf us\n", (cpu_time_used*1000000)/N);
     printf("Exps per second: %.2lf\n", (N / cpu_time_used));
