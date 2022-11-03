@@ -52,6 +52,8 @@ return (
 `);
 } %>
 
+
+
 <% global.fromMont_b = function() {
 return (
 `
@@ -64,6 +66,18 @@ return (
         call ${name}_toNormal
         mov  rdx, rdi
         pop  rdi
+        pop  rsi
+`);
+} %>
+
+<% global.fromMont_r = function () {
+return (
+`
+        sub  rsp, ${ (n64+1)*8 }
+        push rsi
+        mov  rsi, rdi
+        mov  rdi, rsp
+        call ${name}_toNormal
         pop  rsi
 `);
 } %>

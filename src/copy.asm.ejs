@@ -162,7 +162,7 @@ u64toLong_adjust_neg:
         bt      rax, 62
         jnc     <%=name%>_longNormal
 <%=name%>_longMontgomery:
-<%=     global.fromMont_a()       %>
+<%=     global.fromMont_r()       %>
 
 <%=name%>_longNormal:
         mov     rax, [rdi + 8]
