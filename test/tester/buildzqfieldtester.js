@@ -10,7 +10,8 @@ const exec = util.promisify(require("child_process").exec);
 const buildZqField = require("../../index.js").buildZqField;
 
 module.exports.generateTester = generateTester;
-module.exports.generateTesterNoASM = generateTesterNoASM;
+module.exports.generateTesterNoAsm = generateTesterNoAsm;
+module.exports.generateTesterArm64Asm = generateTesterArm64Asm;
 module.exports.testField = testField;
 
 async function  generateTester(prime, dir) {
@@ -43,7 +44,7 @@ async function  generateTester(prime, dir) {
     );
 }
 
-async function  generateTesterNoASM(prime, dir) {
+async function  generateTesterNoAsm(prime, dir) {
 
     console.log("Using No ASM Fr");
 
@@ -61,6 +62,29 @@ async function  generateTesterNoASM(prime, dir) {
         ` ${path.join(dir.path,  "fr_raw_generic.cpp")}` +
         ` -o ${path.join(dir.path, "tester")}` +
         " -lgmp -g"
+    );
+}
+
+async function  generateTesterArm64Asm(prime, dir) {
+
+    console.log("Using Arm ASM Fr");
+
+    await exec(`cp  ${path.join(__dirname,  "tester.cpp")} ${dir.path}`);
+    await exec(`cp  ${path.join(__dirname,  "bn128", "fr.hpp")} ${dir.path}`);
+    await exec(`cp  ${path.join(__dirname,  "bn128", "fr.cpp")} ${dir.path}`);
+    await exec(`cp  ${path.join(__dirname,  "bn128", "fr_raw_arm64.s")} ${dir.path}`);
+    await exec(`cp  ${path.join(__dirname,  "bn128", "fr_generic.cpp")} ${dir.path}`);
+    await exec(`cp  ${path.join(__dirname,  "bn128", "fr_raw_generic.cpp")} ${dir.path}`);
+    await exec(`cp  ${path.join(__dirname,  "bn128", "fr_element.hpp")} ${dir.path}`);
+
+    await exec("g++" +
+        ` ${path.join(dir.path,  "tester.cpp")}` +
+        ` ${path.join(dir.path,  "fr.cpp")}` +
+        ` ${path.join(dir.path,  "fr_raw_arm64.s")}` +
+        ` ${path.join(dir.path,  "fr_generic.cpp")}` +
+        ` ${path.join(dir.path,  "fr_raw_generic.cpp")}` +
+        ` -o ${path.join(dir.path, "tester")}` +
+        " -lgmp -g -DARCH_ARM64"
     );
 }
 

@@ -1,11 +1,13 @@
 const tester = require("./tester/buildzqfieldtester.js").testField;
 const generateTester = require("./tester/buildzqfieldtester.js").generateTester;
-const generateTesterNoASM = require("./tester/buildzqfieldtester.js").generateTesterNoASM;
+const generateTesterNoAsm = require("./tester/buildzqfieldtester.js").generateTesterNoAsm;
+const generateTesterArm64Asm = require("./tester/buildzqfieldtester.js").generateTesterArm64Asm;
 
 const ZqField = require("ffjavascript").ZqField;
 
 const bigInt = require("big-integer");
 const tmp = require("tmp-promise");
+const {generateTesterASMArm64} = require("./tester/buildzqfieldtester");
 
 const bn128q = new bigInt("21888242871839275222246405745257275088696311157297823662689037894645226208583");
 const bn128r = new bigInt("21888242871839275222246405745257275088548364400416034343698204186575808495617");
@@ -59,8 +61,11 @@ function generateTest(curve, name) {
         console.log("generating " + name + " tester");
         tmp.setGracefulCleanup();
         testerDir = await tmp.dir({prefix: "ffiasm_", unsafeCleanup: true});
-        if (name === "bn128") {
-            await generateTesterNoASM(curve, testerDir);
+        const usePrebuildFr = process.env.USE_PREBUILT_FR;
+        if (name === "bn128" && usePrebuildFr && usePrebuildFr.toLowerCase() === "noasm") {
+            await generateTesterNoAsm(curve, testerDir);
+        } else if (name === "bn128" && usePrebuildFr && usePrebuildFr.toLowerCase() === "arm64") {
+            await generateTesterArm64Asm(curve, testerDir);
         } else {
             await generateTester(curve, testerDir);
         }
