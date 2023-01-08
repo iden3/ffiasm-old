@@ -1,5 +1,6 @@
 const tester = require("./tester/buildzqfieldtester.js").testField;
 const generateTester = require("./tester/buildzqfieldtester.js").generateTester;
+const generateTesterNoASM = require("./tester/buildzqfieldtester.js").generateTesterNoASM;
 
 const ZqField = require("ffjavascript").ZqField;
 
@@ -58,7 +59,11 @@ function generateTest(curve, name) {
         console.log("generating " + name + " tester");
         tmp.setGracefulCleanup();
         testerDir = await tmp.dir({prefix: "ffiasm_", unsafeCleanup: true});
-        await generateTester(curve, testerDir);
+        if (name === "bn128") {
+            await generateTesterNoASM(curve, testerDir);
+        } else {
+            await generateTester(curve, testerDir);
+        }
         console.log("generation finished");
     });
 
