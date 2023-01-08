@@ -27,6 +27,7 @@ typedef struct {
 
 std::map<std::string, FunctionSpec> functions;
 std::vector<FrElement> stack;
+std::regex re("(\\s*[,;]\\s*)|\\s+"); // whitespace
 
 void addFunction(std::string name, FuncAny f, int nOps) {
     FunctionSpec fs;
@@ -113,7 +114,7 @@ void callFunction(FunctionSpec fs) {
 }
 
 void processLine(std::string &line) {
-    std::regex re("(\\s*[,;]\\s*)|\\s+"); // whitespace
+    //std::regex re("(\\s*[,;]\\s*)|\\s+"); // whitespace
 
     std::sregex_token_iterator begin( line.begin(), line.end(), re ,-1);
     std::sregex_token_iterator end;
