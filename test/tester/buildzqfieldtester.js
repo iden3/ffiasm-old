@@ -9,13 +9,10 @@ const exec = util.promisify(require("child_process").exec);
 
 const buildZqField = require("../../index.js").buildZqField;
 
-module.exports = testField;
+module.exports.generateTester = generateTester;
+module.exports.testField = testField;
 
-async function  testField(prime, test) {
-    tmp.setGracefulCleanup();
-
-    const dir = await tmp.dir({prefix: "ffiasm_", unsafeCleanup: true });
-
+async function  generateTester(prime, dir) {
     const source = await buildZqField(prime, "Fr");
 
     // console.log(dir.path);
@@ -37,12 +34,23 @@ async function  testField(prime, test) {
     } else throw("Unsupported platform");
 
     await exec("g++" +
-               ` ${path.join(dir.path,  "tester.cpp")}` +
-               ` ${path.join(dir.path,  "fr.o")}` +
-               ` ${path.join(dir.path,  "fr.cpp")}` +
-               ` -o ${path.join(dir.path, "tester")}` +
-               " -lgmp -g"
+        ` ${path.join(dir.path,  "tester.cpp")}` +
+        ` ${path.join(dir.path,  "fr.o")}` +
+        ` ${path.join(dir.path,  "fr.cpp")}` +
+        ` -o ${path.join(dir.path, "tester")}` +
+        " -lgmp -g"
     );
+}
+
+async function testField(prime, name, opName, test, testerDir) {
+    //tmp.setGracefulCleanup();
+
+    //const dir = await tmp.dir({prefix: "ffiasm_", unsafeCleanup: true });
+
+    const testVectorDir = path.join(__dirname, "testvectors", name);
+    if (!fs.existsSync(testVectorDir)) {
+        fs.mkdirSync(testVectorDir);
+    }
 
     const inLines = [];
     for (let i=0; i<test.length; i++) {
@@ -52,13 +60,13 @@ async function  testField(prime, test) {
     }
     inLines.push("");
 
-    await fs.promises.writeFile(path.join(dir.path, "in.tst"), inLines.join("\n"), "utf8");
+    await fs.promises.writeFile(path.join(testVectorDir, opName + ".in.tst"), inLines.join("\n"), "utf8");
 
-    await exec(`${path.join(dir.path, "tester")}` +
-        ` <${path.join(dir.path, "in.tst")}` +
-        ` >${path.join(dir.path, "out.tst")}`);
+    await exec(`${path.join(testerDir.path, "tester")}` +
+        ` <${path.join(testVectorDir, opName + ".in.tst")}` +
+        ` >${path.join(testVectorDir, opName + ".out.tst")}`);
 
-    const res = await fs.promises.readFile(path.join(dir.path, "out.tst"), "utf8");
+    const res = await fs.promises.readFile(path.join(testVectorDir, opName + ".out.tst"), "utf8");
     const resLines = res.split("\n");
 
     for (let i=0; i<test.length; i++) {
