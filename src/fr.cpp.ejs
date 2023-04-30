@@ -166,6 +166,9 @@ void <%=name%>_fail() {
     assert(false);
 }
 
+void <%=name%>_longErr() {
+    <%=name%>_fail();
+}
 
 Raw<%=name%>::Raw<%=name%>() {
     <%=name%>_init();
@@ -212,7 +215,7 @@ void Raw<%=name%>::set(Element &r, int value) {
   }
 
   mpz_export((void *)(r.v), NULL, -1, 8, -1, 0, mr);
-      
+
   for (int i=0; i<<%=name%>_N64; i++) r.v[i] = 0;
   mpz_export((void *)(r.v), NULL, -1, 8, -1, 0, mr);
   <%=name%>_rawToMontgomery(r.v,r.v);
@@ -242,7 +245,7 @@ void Raw<%=name%>::inv(Element &r, const Element &a) {
     for (int i=0; i<<%=name%>_N64; i++) r.v[i] = 0;
     mpz_export((void *)(r.v), NULL, -1, 8, -1, 0, mr);
 
-    <%=name%>_rawMMul(r.v, r.v,<%=name%>_rawR3);
+    <%=name%>_rawMMul(r.v, r.v,<%=name%>_R3.longVal);
     mpz_clear(mr);
 }
 
@@ -294,11 +297,11 @@ int Raw<%=name%>::toRprBE(const Element &element, uint8_t *data, int bytes)
 
     mpz_t r;
     mpz_init(r);
-  
+
     toMpz(r, element);
-    
+
     mpz_export(data, NULL, 1, 8, 1, 0, r);
-  
+
     return <%=name%>_N64 * 8;
 }
 
