@@ -46,6 +46,8 @@ namespace BinFileUtils {
         u_int32_t readU32LE();
         u_int64_t readU64LE();
 
+        std::string readString();
+
         void *read(uint64_t l);
     };
 

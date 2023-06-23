@@ -5,9 +5,11 @@
 #include <system_error>
 #include <string>
 #include <memory.h>
-
+#include <algorithm>
+#include <iostream>
 #include "binfile_utils.hpp"
 
+using namespace std;
 namespace BinFileUtils {
 
 BinFile::BinFile(std::string fileName, std::string _type, uint32_t maxVersion) {
@@ -136,6 +138,26 @@ void *BinFile::read(u_int64_t len) {
     void *res = (void *)((u_int64_t)addr + pos);
     pos += len;
     return res;
+}
+
+std::string BinFile::readString()
+{
+    uint8_t* startOfString = (uint8_t *)((u_int64_t)addr + pos);
+    uint8_t* endOfString = startOfString;
+    for (uint8_t *i = endOfString; ; i++)
+    {
+        if (*i == 0)
+        {
+            endOfString = i;
+            break;
+        }
+    }
+
+    uint32_t len = endOfString - startOfString;
+    std::string str = std::string((const char *)startOfString, len);
+    pos += len + 1;
+
+    return str;
 }
 
 std::unique_ptr<BinFile> openExisting(std::string filename, std::string type, uint32_t maxVersion) {
