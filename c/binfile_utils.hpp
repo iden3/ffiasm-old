@@ -49,6 +49,8 @@ namespace BinFileUtils
         u_int64_t readU64LE();
 
         void *read(uint64_t l);
+
+        std::string readString();
     };
 
     std::unique_ptr<BinFile> openExisting(std::string filename, std::string type, uint32_t maxVersion);
