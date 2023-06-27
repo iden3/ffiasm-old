@@ -210,7 +210,7 @@ namespace BinFileUtils
     {
         uint8_t *startOfString = (uint8_t *)((u_int64_t)addr + pos);
         uint8_t *endOfString = startOfString;
-        uint8_t *endOfSection = readingSection->start + readingSection->size;
+        uint8_t *endOfSection = (uint8_t *)((uint64_t)readingSection->start + readingSection->size);
 
         uint8_t *i;
         for (i = endOfString; i != endOfSection; i++)
