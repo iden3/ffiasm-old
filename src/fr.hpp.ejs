@@ -61,6 +61,7 @@ extern "C" void <%=name%>_rawMMul1(<%=name%>RawElement pRawResult, const <%=name
 extern "C" void <%=name%>_rawToMontgomery(<%=name%>RawElement pRawResult, const <%=name%>RawElement &pRawA);
 extern "C" void <%=name%>_rawFromMontgomery(<%=name%>RawElement pRawResult, const <%=name%>RawElement &pRawA);
 extern "C" int <%=name%>_rawIsEq(const <%=name%>RawElement pRawA, const <%=name%>RawElement pRawB);
+extern "C" int <%=name%>_rawLt(const <%=name%>RawElement pRawA, const <%=name%>RawElement pRawB);
 extern "C" int <%=name%>_rawIsZero(const <%=name%>RawElement pRawB);
 
 extern "C" void <%=name%>_fail();
@@ -137,6 +138,7 @@ public:
     void inline toMontgomery(Element &r, const Element &a) { <%=name%>_rawToMontgomery(r.v, a.v); };
     void inline fromMontgomery(Element &r, const Element &a) { <%=name%>_rawFromMontgomery(r.v, a.v); };
     int inline eq(const Element &a, const Element &b) { return <%=name%>_rawIsEq(a.v, b.v); };
+    int inline lt(const Element &a, const Element &b) { return <%=name%>_rawLt(a.v, b.v); };
     int inline isZero(const Element &a) { return <%=name%>_rawIsZero(a.v); };
 
     void toMpz(mpz_t r, const Element &a);

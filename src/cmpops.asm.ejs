@@ -474,6 +474,27 @@ req_ret0:
         mov [rdi], rax
         ret
 
+<%=name%>_rawLt:
+
+        mov     rax, [rsi + 24]
+        cmp     [rdx + 24], rax    ; compare with (q-1)/2
+        jc rlt_ret0                ; rsi<rdx => 1st > 2nd
+        jnz rlt_ret1
+
+        mov     rax, [rsi + 16]
+        cmp     [rdx + 16], rax    ; compare with (q-1)/2
+        jc rlt_ret0                ; rsi<rdx => 1st > 2nd
+        jnz rlt_ret1
+
+        mov     rax, [rsi + 8]
+        cmp     [rdx + 8], rax     ; compare with (q-1)/2
+        jc rlt_ret0                ; rsi<rdx => 1st > 2nd
+        jnz rlt_ret1
+
+        mov     rax, [rsi]
+        cmp     [rdx], rax         ; compare with (q-1)/2
+        jc rlt_ret0                ; rsi<rdx => 1st > 2nd
+        jnz rlt_ret1
 
 
 ;;;;;;;;;;;;;;;;;;;;;;
