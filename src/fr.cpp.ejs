@@ -310,7 +310,36 @@ int Raw<%=name%>::fromRprBE(Element &element, const uint8_t *data, int bytes)
     mpz_t r;
     mpz_init(r);
 
-    mpz_import(r, <%=name%>_N64 * 8, 0, 1, 0, 0, data);
+    mpz_import(r, bytes, 1, 1, 0, 0, data);
+    fromMpz(element, r);
+    return <%=name%>_N64 * 8;
+}
+
+int Raw<%=name%>::toRprLE(const Element &element, uint8_t *data, int bytes)
+{
+    if (bytes < <%=name%>_N64 * 8) {
+      return -(<%=name%>_N64 * 8);
+    }
+
+    mpz_t r;
+    mpz_init(r);
+  
+    toMpz(r, element);
+    
+    mpz_export(data, NULL, -1, bytes, -1, 0, r);
+  
+    return <%=name%>_N64 * 8;
+}
+
+int Raw<%=name%>::fromRprLE(Element &element, const uint8_t *data, int bytes)
+{
+    if (bytes < <%=name%>_N64 * 8) {
+      return -(<%=name%>_N64* 8);
+    }
+    mpz_t r;
+    mpz_init(r);
+
+    mpz_import(r, bytes, -1, 1, -1, 0, data);
     fromMpz(element, r);
     return <%=name%>_N64 * 8;
 }
