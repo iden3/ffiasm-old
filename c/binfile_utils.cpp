@@ -115,7 +115,7 @@ namespace BinFileUtils
 
     BinFile::~BinFile()
     {
-        // free(addr);
+        free(addr);
     }
 
     void BinFile::startReadSection(u_int32_t sectionId, u_int32_t sectionPos)
