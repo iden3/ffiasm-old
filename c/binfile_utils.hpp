@@ -30,6 +30,7 @@ namespace BinFileUtils
         u_int32_t version;
 
         Section *readingSection;
+        Section *writingSection;
 
     public:
         BinFile(void *data, uint64_t size, std::string type, uint32_t maxVersion);
@@ -37,9 +38,7 @@ namespace BinFileUtils
 
         ~BinFile();
 
-        void *getSetcionData(u_int32_t sectionId, u_int32_t sectionPos = 0);
-
-        void startReadSection(u_int32_t sectionId, u_int32_t setionPos = 0);
+        void startReadSection(u_int32_t sectionId, u_int32_t sectionPos = 0);
         void endReadSection(bool check = true);
 
         void *getSectionData(u_int32_t sectionId, u_int32_t sectionPos = 0);
@@ -51,6 +50,14 @@ namespace BinFileUtils
         void *read(uint64_t l);
 
         std::string readString();
+
+        void startWriteSection(u_int32_t sectionId, u_int32_t sectionPos = 0);
+        void endWriteSection();
+
+        void writeU32LE(u_int32_t value);
+        void writeU64LE(u_int64_t value);
+        void write(void *buffer, u_int64_t len);
+        void writeString(const std::string& str);
     };
 
     std::unique_ptr<BinFile> openExisting(std::string filename, std::string type, uint32_t maxVersion);

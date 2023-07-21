@@ -73,7 +73,6 @@ namespace BinFileUtils
 
         int nThreads = omp_get_max_threads() / 2;
         ThreadUtils::parcpy(addr, addrmm, sb.st_size, nThreads);
-        //    memcpy(addr, addrmm, sb.st_size);
 
         munmap(addrmm, sb.st_size);
         close(fd);
@@ -232,6 +231,64 @@ namespace BinFileUtils
         pos += len + 1;
 
         return str;
+    }
+
+    void BinFile::startWriteSection(u_int32_t sectionId, u_int32_t sectionPos) 
+    {
+        if (writingSection != NULL)
+        {
+            throw new std::range_error("Already writing a section");
+        }
+
+        sections[sectionId][sectionPos] = Section((void *)((u_int64_t)addr + pos), 0);
+
+        writingSection = &sections[sectionId][sectionPos];
+
+    }
+
+    void BinFile::endWriteSection() 
+    {
+        if (writingSection == NULL)
+        {
+            throw new std::range_error("Not writing a section");
+        }
+                
+        writingSection->size = (u_int64_t)addr + pos - (u_int64_t)(writingSection->start);
+
+        writingSection = NULL;
+    }
+
+    void BinFile::writeU32LE(u_int32_t value) 
+    {
+        *(u_int32_t*)((u_int64_t)addr + pos) = value;
+        pos += 4;
+    }
+
+    void BinFile::writeU64LE(u_int64_t value) 
+    {
+        *(u_int64_t*)((u_int64_t)addr + pos) = value;
+        pos += 8;
+    }
+
+    void BinFile::write(void *buffer, u_int64_t len) 
+    {
+        int nThreads = omp_get_max_threads() / 2;
+        ThreadUtils::parcpy((void *)((u_int64_t)addr + pos), buffer, len, nThreads);
+        pos += len;
+    }
+
+    void BinFile::writeString(const std::string& str) 
+    {
+        u_int8_t* buff = new u_int8_t[str.length() + 1];
+        for (size_t i = 0; i < str.length(); i++) {
+            buff[i] = str[i];
+        }
+
+        buff[str.length()] = 0;
+
+        write(buff, str.length() + 1);
+
+        delete[] buff;
     }
 
     std::unique_ptr<BinFile> openExisting(std::string filename, std::string type, uint32_t maxVersion)
