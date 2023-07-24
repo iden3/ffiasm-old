@@ -35,6 +35,7 @@ namespace BinFileUtils
     public:
         BinFile(void *data, uint64_t size, std::string type, uint32_t maxVersion);
         BinFile(std::string fileName, std::string type, uint32_t maxVersion);
+        BinFile(std::string fileName, std::string type, uint32_t version, uint32_t nSections);
 
         ~BinFile();
 

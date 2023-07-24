@@ -112,6 +112,22 @@ namespace BinFileUtils
         readingSection = NULL;
     }
 
+    BinFile::BinFile(std::string fileName, std::string type, uint32_t version, uint32_t nSections)
+    {
+        pos = 0;
+
+        std::vector<char> bytes(4);
+        for (int i = 0; i < 4; i++) bytes[i] = type.at(i);
+        
+        write(bytes.data(), 4);
+
+        writeU32LE(version);
+
+        writeU32LE(nSections);
+
+        writingSection = NULL;
+    }
+
     BinFile::~BinFile()
     {
         free(addr);
