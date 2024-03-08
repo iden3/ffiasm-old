@@ -295,6 +295,7 @@ bnot_l1n:
 ; Modified Registers:
 ;    r8, r9, 10, r11, rax, rcx
 ;;;;;;;;;;;;;;;;;;;;;;
+<%=name%>_rawShr:
 rawShr:
         cmp rdx, 0
         je <%=name%>_rawCopy
@@ -378,6 +379,7 @@ rawShr_endif3_<%=i%>:
 ; Modified Registers:
 ;    r8, r9, 10, r11, rax, rcx
 ;;;;;;;;;;;;;;;;;;;;;;
+<%=name%>_rawShl:
 rawShl:
         cmp rdx, 0
         je <%=name%>_rawCopy
